@@ -10,5 +10,5 @@ ln -s ~/.dotfiles/.p10k.zsh ~/.p10k.zsh
 mkdir -p ~/.config/nvim
 ln -s ~/.dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 
-# motd
+# message
 echo "⚠️reload zsh. e.g. run \"source ~/.zshrc\""
