@@ -1,5 +1,5 @@
 # history
-HISTFILE="~/.zsh_history"
+HISTFILE="$HOME/.zsh_history"
 HISTSIZE=1000
 SAVEHIST=1000000
 setopt share_history
@@ -17,13 +17,17 @@ export PAGER="less"
 bindkey -e
 
 # zplug
-if [[ -r "~/.zplug/init.zsh" ]]; then
-	source "~/.zplug/init.zsh"
+if [ -r "$HOME/.zplug/init.zsh" ]; then
+	source "$HOME/.zplug/init.zsh"
 
 	zplug "Aloxaf/fzf-tab"
 	zplug "romkatv/powerlevel10k", as:theme
 	zplug "zsh-users/zsh-syntax-highlighting"
 	zplug "zplug/zplug", hook-build:"zplug --self-manage"
+
+	if ! zplug check; then
+		zplug install
+	fi
 
 	zplug load --verbose
 fi
@@ -36,8 +40,8 @@ zstyle ":fzf-tab:*" default-color ""
 zstyle ":fzf-tab:*" fzf-pad 4
 
 # powerlevel10k
-if [[ -r "~/.p10k.zsh" ]]; then
-	source "~/.p10k.zsh"
+if [ -r "$HOME/.p10k.zsh" ]; then
+	source "$HOME/.p10k.zsh"
 fi
 
 clear

@@ -9,7 +9,7 @@ git clone --depth 1 https://github.com/GossiperLoturot/dotfiles ~/.dotfiles
 
 # create symbolic link
 ln -s ~/.dotfiles/.zshrc ~/.zshrc
-ln -s ~/.dotfiles/.p10k ~/.p10k
+ln -s ~/.dotfiles/.p10k.zsh ~/.p10k.zsh
 
 mkdir -p ~/.config/nvim
 ln -s ~/.dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
@@ -18,4 +18,4 @@ ln -s ~/.dotfiles/.config/nvim/init.lua ~/.config/nvim/init.lua
 source ~/.zshrc
 
 # init neovim
-neovim +PackerSync +qall
+nvim +PackerSync +qall
