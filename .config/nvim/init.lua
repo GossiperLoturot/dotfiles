@@ -6,8 +6,14 @@ vim.opt.termguicolors = true
 vim.opt.spell = true
 vim.opt.spelllang = { 'en_us' }
 
+-- Bootstrap Plugin Manager
+local has_packer, packer = pcall(require, 'packer')
+if not has_packer then
+	vim.cmd([[!git clone --depth 1 https://github.com/wbthomason/packer.nvim  ~/.local/share/nvim/site/pack/packer/start/packer.nvim]])
+end
+
 -- Plugin Manager
-require('packer').startup(function(use)
+packer.startup(function(use)
 	use({ 'wbthomason/packer.nvim' })
 	use({ 'joshdick/onedark.vim' })
 	use({ 'nvim-lualine/lualine.nvim', requires = { 'kyazdani42/nvim-web-devicons', opt = true } })
@@ -28,6 +34,10 @@ require('packer').startup(function(use)
 	use({ 'nvim-telescope/telescope.nvim', requires = { 'nvim-lua/plenary.nvim' } })
 	use({ 'weilbith/nvim-code-action-menu' })
 	use({ 'j-hui/fidget.nvim' })
+
+	if not has_packer then
+		packer.sync()
+	end
 end)
 
 -- Colorscheme

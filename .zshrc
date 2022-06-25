@@ -16,6 +16,11 @@ export VISUAL="vim"
 export PAGER="less"
 bindkey -e
 
+# bootstraps zplug
+if [ ! -r "$HOME/.zplug/init.zsh" ]; then
+	git clone https://github.com/zplug/zplug ~/.zplug
+fi
+
 # zplug
 if [ -r "$HOME/.zplug/init.zsh" ]; then
 	source "$HOME/.zplug/init.zsh"
@@ -35,7 +40,7 @@ fi
 # completion
 zstyle ":completion:*:descriptions" format "[%d]"
 zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
-zstyle ':fzf-tab:*' single-group color header
+zstyle ":fzf-tab:*" single-group color header
 zstyle ":fzf-tab:*" default-color ""
 zstyle ":fzf-tab:*" fzf-pad 4
 
