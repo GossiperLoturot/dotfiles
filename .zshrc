@@ -1,24 +1,19 @@
 # history
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=1000
-SAVEHIST=1000000
+export HISTFILE="$HOME/.zsh_history"
+export HISTSIZE=1000
+export SAVEHIST=1000000
 setopt share_history
 
 # set alias and default editor, zsh keybind
-alias ls="exa --icons"
-alias l="exa -al --icons"
-alias cat="bat"
-alias vi="nvim"
-alias vim="nvim"
-export BAT_THEME="OneHalfDark"
 export EDITOR="vim"
 export VISUAL="vim"
 export PAGER="less"
+export BAT_THEME="OneHalfDark"
 bindkey -e
 
 # bootstraps zplug
 if [ ! -r "$HOME/.zplug/init.zsh" ]; then
-	git clone https://github.com/zplug/zplug ~/.zplug
+	git clone "https://github.com/zplug/zplug" "$HOME/.zplug"
 fi
 
 # zplug
@@ -26,7 +21,6 @@ if [ -r "$HOME/.zplug/init.zsh" ]; then
 	source "$HOME/.zplug/init.zsh"
 
 	zplug "Aloxaf/fzf-tab"
-	zplug "romkatv/powerlevel10k", as:theme
 	zplug "zsh-users/zsh-syntax-highlighting"
 	zplug "zplug/zplug", hook-build:"zplug --self-manage"
 
@@ -34,8 +28,11 @@ if [ -r "$HOME/.zplug/init.zsh" ]; then
 		zplug install
 	fi
 
-	zplug load --verbose
+	zplug load
 fi
+
+# prompt
+export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"
 
 # completion
 zstyle ":completion:*:descriptions" format "[%d]"
@@ -43,10 +40,3 @@ zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
 zstyle ":fzf-tab:*" single-group color header
 zstyle ":fzf-tab:*" default-color ""
 zstyle ":fzf-tab:*" fzf-pad 4
-
-# powerlevel10k
-if [ -r "$HOME/.p10k.zsh" ]; then
-	source "$HOME/.p10k.zsh"
-fi
-
-clear
