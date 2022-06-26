@@ -15,17 +15,17 @@ vim.keymap.set('n', '<Space>l', vim.lsp.buf.formatting)
 -- bootstarp
 local has_packer, _ = pcall(require, 'packer')
 if not has_packer then
-	local path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 	local url = 'https://github.com/wbthomason/packer.nvim'
+	local path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 	vim.cmd(string.format([[!git clone --depth 1 %s %s]], url, path))
+	vim.cmd([[packadd packer.nvim]])
 end
 
 -- plugins
-vim.cmd([[packadd packer.nvim]])
-return require('packer').startup(function(use)
+require('packer').startup(function(use)
 
 	-- package manager
-	use({ 'wbthomason/packer.nvim', opt = true })
+	use({ 'wbthomason/packer.nvim' })
 
 	-- colorscheme
 	use({
@@ -44,7 +44,7 @@ return require('packer').startup(function(use)
 	-- status line
 	use({
 		'nvim-lualine/lualine.nvim',
-		requires = { 'kyazdani42/nvim-web-devicons', opt = true },
+		requires = { 'kyazdani42/nvim-web-devicons' },
 		config = function()
 			require('lualine').setup({
 				options = { globalstatus = true }
@@ -202,4 +202,9 @@ return require('packer').startup(function(use)
 			require('fidget').setup({})
 		end
 	})
+
+	-- bootstrap
+	if not has_packer then
+		require('packer').sync()
+	end
 end)
