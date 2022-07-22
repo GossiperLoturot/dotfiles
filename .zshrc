@@ -5,10 +5,11 @@ export SAVEHIST=1000000
 setopt share_history
 
 # set alias and default editor, zsh keybind
-export EDITOR="vim"
-export VISUAL="vim"
+alias ls="exa --icons"
+alias cat="bat --theme=OneHalfDark"
+export EDITOR="nvim"
+export VISUAL="nvim"
 export PAGER="less"
-export BAT_THEME="OneHalfDark"
 bindkey -e
 
 # bootstraps zplug
