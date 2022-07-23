@@ -91,6 +91,14 @@ require('packer').startup(function(use)
 	use({ 'tpope/vim-commentary' })
 	use({ 'tpope/vim-surround' })
 
+	-- auto pairs
+	use({
+		"windwp/nvim-autopairs",
+		config = function()
+			require("nvim-autopairs").setup({})
+		end
+	})
+
 	-- completion
 	use({
 		'hrsh7th/nvim-cmp',
@@ -153,10 +161,13 @@ require('packer').startup(function(use)
 			require('nvim-lsp-installer').setup({})
 
 			-- lsp completion
-			cap = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+			local cap = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 			-- lsp configure
-			require('lspconfig').rust_analyzer.setup({
+			local lspconfig = require('lspconfig')
+
+			-- rust-analyzer
+			lspconfig.rust_analyzer.setup({
 				capabilities = cap,
 				settings = {
 					['rust-analyzer'] = { checkOnSave = { command = 'clippy' } }
