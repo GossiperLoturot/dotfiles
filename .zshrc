@@ -41,3 +41,8 @@ zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
 zstyle ":fzf-tab:*" single-group color header
 zstyle ":fzf-tab:*" default-color ""
 zstyle ":fzf-tab:*" fzf-pad 4
+
+# cargo
+if [ -r "$HOME/.cargo/env" ]; then
+	source "$HOME/.cargo/env"
+fi
