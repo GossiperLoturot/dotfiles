@@ -157,22 +157,19 @@ require('packer').startup(function(use)
 		},
 		config = function()
 
-			-- lsp server installer
-			require('nvim-lsp-installer').setup({})
+			-- lsp installer
+			local lsp_installer = require('nvim-lsp-installer')
+			lsp_installer.setup({})
+			local servers = lsp_installer.get_installed_servers()
 
 			-- lsp completion
 			local cap = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 			-- lsp configure
-			local lspconfig = require('lspconfig')
-
-			-- rust-analyzer
-			lspconfig.rust_analyzer.setup({
-				capabilities = cap,
-				settings = {
-					['rust-analyzer'] = { checkOnSave = { command = 'clippy' } }
-				}
-			})
+			local lsp_config = require('lspconfig')
+			for _, server in ipairs(servers) do
+				lsp_config[servers.name].setup({ capabilities = cap })
+			end
 		end
 	})
 
