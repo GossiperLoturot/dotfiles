@@ -168,7 +168,7 @@ require('packer').startup(function(use)
 			-- lsp configure
 			local lsp_config = require('lspconfig')
 			for _, server in ipairs(servers) do
-				lsp_config[servers.name].setup({ capabilities = cap })
+				lsp_config[server.name].setup({ capabilities = cap })
 			end
 		end
 	})
