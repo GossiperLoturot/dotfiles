@@ -1,3 +1,7 @@
+-- disable netrw
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 vim.opt.tabstop = 2
 vim.opt.shiftwidth = 0
 vim.opt.softtabstop = -1
@@ -223,6 +227,29 @@ require("packer").startup(function(use)
       vim.keymap.set("n", "<Space>a", code_action_menu.open_code_action_menu)
     end
   })
+
+	-- filter
+	use({
+		"nvim-tree/nvim-tree.lua",
+		config = function()
+			require("nvim-tree").setup({
+				renderer = {
+					icons = {
+						show = {
+							file = false,
+							folder = false,
+							folder_arrow = false,
+							git = false,
+							modified = false,
+						}
+					}
+				}
+			})
+
+			local api = require("nvim-tree.api")
+      vim.keymap.set("n", "<Space>t", api.tree.toggle)
+		end
+	})
 
   -- bootstrap
   if not has_packer then
