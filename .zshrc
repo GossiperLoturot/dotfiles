@@ -51,6 +51,16 @@ fi
 # cargo
 if [ -r "$HOME/.cargo/env" ]; then
   source "$HOME/.cargo/env"
+
+	# sccache
+	if exists sccache; then
+		export RUSTC_WRAPPER="sccache"
+	fi
+
+	# mold
+	if exists mold; then
+		export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
+	fi
 fi
 
 # bun
