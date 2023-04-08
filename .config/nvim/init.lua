@@ -154,24 +154,29 @@ require("packer").startup(function(use)
     end
   })
 
+  -- lsp and dap, linter, formatter installer
+  use({
+    "williamboman/mason.nvim",
+    config = function()
+      require("mason").setup()
+    end
+  })
+
   -- lsp
   use({
     "neovim/nvim-lspconfig",
     requires = {
-      "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
-      "simrat39/rust-tools.nvim",
-      "hrsh7th/cmp-nvim-lsp"
+      "simrat39/rust-tools.nvim"
     },
+    after = { "mason.nvim", "cmp-nvim-lsp" },
     config = function()
-      -- lsp installer
-      require("mason").setup()
       require("mason-lspconfig").setup()
 
       -- lsp completion
       local cap = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
 
-      -- lsp configure
+      -- setup lsp
       local lsp_config = require("lspconfig")
       require("mason-lspconfig").setup_handlers({
         function(server_name)
@@ -181,6 +186,21 @@ require("packer").startup(function(use)
           require("rust-tools").setup()
         end
       })
+    end
+  })
+
+  -- linter and formatter
+  use({
+    "jose-elias-alvarez/null-ls.nvim",
+    requires = { "jay-babu/mason-null-ls.nvim" },
+    after = { "mason.nvim" },
+    config = function()
+      require("mason-null-ls").setup({ automatic_setup = true })
+
+      require("null-ls").setup()
+
+      -- setup linter and formatter
+      require("mason-null-ls").setup_handlers()
     end
   })
 
