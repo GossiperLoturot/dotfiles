@@ -28,7 +28,6 @@ end
 
 -- plugins
 require("packer").startup(function(use)
-
   -- package manager
   use({ "wbthomason/packer.nvim" })
 
@@ -118,7 +117,6 @@ require("packer").startup(function(use)
       local cmp = require("cmp")
       local snip = require("luasnip")
       cmp.setup({
-
         -- setup completions
         snippet = {
           expand = function(args)
@@ -166,7 +164,6 @@ require("packer").startup(function(use)
       "hrsh7th/cmp-nvim-lsp"
     },
     config = function()
-
       -- lsp installer
       require("mason").setup()
       require("mason-lspconfig").setup()
@@ -192,7 +189,6 @@ require("packer").startup(function(use)
     "nvim-telescope/telescope.nvim",
     requires = { "nvim-lua/plenary.nvim" },
     config = function()
-
       -- setup telescope
       local actions = require("telescope.actions")
       require("telescope").setup({
@@ -228,28 +224,28 @@ require("packer").startup(function(use)
     end
   })
 
-	-- filter
-	use({
-		"nvim-tree/nvim-tree.lua",
-		config = function()
-			require("nvim-tree").setup({
-				renderer = {
-					icons = {
-						show = {
-							file = false,
-							folder = false,
-							folder_arrow = false,
-							git = false,
-							modified = false,
-						}
-					}
-				}
-			})
+  -- filter
+  use({
+    "nvim-tree/nvim-tree.lua",
+    config = function()
+      require("nvim-tree").setup({
+        renderer = {
+          icons = {
+            show = {
+              file = false,
+              folder = false,
+              folder_arrow = false,
+              git = false,
+              modified = false,
+            }
+          }
+        }
+      })
 
-			local api = require("nvim-tree.api")
+      local api = require("nvim-tree.api")
       vim.keymap.set("n", "<Space>t", api.tree.toggle)
-		end
-	})
+    end
+  })
 
   -- bootstrap
   if not has_packer then
