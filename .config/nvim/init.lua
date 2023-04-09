@@ -18,21 +18,16 @@ vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename)
 vim.keymap.set("n", "<Space>l", vim.lsp.buf.format)
 
 -- bootstrap
-local has_packer, _ = pcall(require, "packer")
-if not has_packer then
-  local url = "https://github.com/wbthomason/packer.nvim"
-  local path = vim.fn.stdpath("data") .. "/site/pack/packer/start/packer.nvim"
-  vim.cmd(string.format([[!git clone --depth 1 %s %s]], url, path))
-  vim.cmd([[packadd packer.nvim]])
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
 end
+vim.opt.rtp:prepend(lazypath)
 
 -- plugins
-require("packer").startup(function(use)
-  -- package manager
-  use({ "wbthomason/packer.nvim" })
-
+require("lazy").setup({
   -- colorscheme
-  use({
+  {
     "GossiperLoturot/termin.vim",
     config = function()
       vim.cmd([[colorscheme termin]])
@@ -43,19 +38,19 @@ require("packer").startup(function(use)
       vim.cmd([[highlight QuickScopePrimary gui=underline guifg=#5fffff]])
       vim.cmd([[highlight QuickScopeSecondary gui=underline guifg=#ff5fff]])
     end
-  })
+  },
 
   -- highligt f jump char
-  use({ "unblevable/quick-scope" })
+  { "unblevable/quick-scope" },
 
   -- indent line
-  use({
+  {
     "lukas-reineke/indent-blankline.nvim",
     config = function() require("indent_blankline").setup() end
-  })
+  },
 
   -- syntax analyzer
-  use({
+  {
     "nvim-treesitter/nvim-treesitter",
     config = function()
       require("nvim-treesitter.configs").setup({
@@ -71,10 +66,10 @@ require("packer").startup(function(use)
         }
       })
     end
-  })
+  },
 
   -- easily to jump
-  use({
+  {
     "phaazon/hop.nvim",
     config = function()
       local hop = require("hop")
@@ -82,30 +77,30 @@ require("packer").startup(function(use)
       vim.keymap.set({ "n", "v", "o" }, "gw", hop.hint_words)
       vim.keymap.set({ "n", "v", "o" }, "gl", hop.hint_lines_skip_whitespace)
     end
-  })
+  },
 
   -- surround supports
-  use({
+  {
     "kylechui/nvim-surround",
     config = function() require("nvim-surround").setup() end
-  })
+  },
 
   -- comment supports
-  use({
+  {
     "numToStr/Comment.nvim",
     config = function() require("Comment").setup() end
-  })
+  },
 
   -- auto pairs
-  use({
+  {
     "windwp/nvim-autopairs",
     config = function() require("nvim-autopairs").setup({ check_ts = true }) end
-  })
+  },
 
   -- completions
-  use({
+  {
     "hrsh7th/nvim-cmp",
-    requires = {
+    dependencies = {
       "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
@@ -152,24 +147,25 @@ require("packer").startup(function(use)
       local cmp_autopairs = require("nvim-autopairs.completion.cmp")
       cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end
-  })
+  },
 
   -- lsp and dap, linter, formatter installer
-  use({
+  {
     "williamboman/mason.nvim",
     config = function()
       require("mason").setup()
     end
-  })
+  },
 
   -- lsp
-  use({
+  {
     "neovim/nvim-lspconfig",
-    requires = {
+    dependencies = {
+      "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
+      "hrsh7th/cmp-nvim-lsp",
       "simrat39/rust-tools.nvim"
     },
-    after = { "mason.nvim", "cmp-nvim-lsp" },
     config = function()
       require("mason-lspconfig").setup()
 
@@ -187,27 +183,25 @@ require("packer").startup(function(use)
         end
       })
     end
-  })
+  },
 
   -- linter and formatter
-  use({
+  {
     "jose-elias-alvarez/null-ls.nvim",
-    requires = { "jay-babu/mason-null-ls.nvim" },
-    after = { "mason.nvim" },
+    dependencies = {
+      "williamboman/mason.nvim",
+      "jay-babu/mason-null-ls.nvim"
+    },
     config = function()
-      require("mason-null-ls").setup({ automatic_setup = true })
-
+      require("mason-null-ls").setup({ handlers = {} })
       require("null-ls").setup()
-
-      -- setup linter and formatter
-      require("mason-null-ls").setup_handlers()
     end
-  })
+  },
 
   -- fuzzy finder
-  use({
+  {
     "nvim-telescope/telescope.nvim",
-    requires = { "nvim-lua/plenary.nvim" },
+    dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       -- setup telescope
       local actions = require("telescope.actions")
@@ -233,19 +227,19 @@ require("packer").startup(function(use)
       vim.keymap.set("n", "<Space>b", telescope.buffers)
       vim.keymap.set("n", "<Space>w", telescope.diagnostics)
     end
-  })
+  },
 
   -- code action
-  use({
+  {
     "weilbith/nvim-code-action-menu",
     config = function()
       local code_action_menu = require("code_action_menu")
       vim.keymap.set("n", "<Space>a", code_action_menu.open_code_action_menu)
     end
-  })
+  },
 
   -- filter
-  use({
+  {
     "nvim-tree/nvim-tree.lua",
     config = function()
       require("nvim-tree").setup({
@@ -265,10 +259,25 @@ require("packer").startup(function(use)
       local api = require("nvim-tree.api")
       vim.keymap.set("n", "<Space>t", api.tree.toggle)
     end
-  })
+  }
+},
 
-  -- bootstrap
-  if not has_packer then
-    require("packer").sync()
-  end
-end)
+-- lazy configure
+{
+  ui = {
+    icons = {
+      cmd = "⌘",
+      config = "🛠",
+      event = "📅",
+      ft = "📂",
+      init = "⚙",
+      keys = "🗝",
+      plugin = "🔌",
+      runtime = "💻",
+      source = "📄",
+      start = "🚀",
+      task = "📌",
+      lazy = "💤",
+    }
+  }
+})
