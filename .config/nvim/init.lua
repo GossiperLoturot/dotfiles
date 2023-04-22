@@ -259,6 +259,14 @@ require("lazy").setup({
       local api = require("nvim-tree.api")
       vim.keymap.set("n", "<Space>t", api.tree.toggle)
     end
+  },
+
+  -- lsp indicator
+  {
+    "https://github.com/j-hui/fidget.nvim",
+    config = function()
+      require("fidget").setup({})
+    end
   }
 },
 
