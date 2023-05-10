@@ -267,6 +267,20 @@ require("lazy").setup({
     config = function()
       require("fidget").setup({})
     end
+  },
+
+  -- git integration
+  { 
+    "TimUntersberger/neogit",
+    dependencies = { "nvim-lua/plenary.nvim" }
+  },
+
+  -- git visualization
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function()
+      require('gitsigns').setup({})
+    end
   }
 },
 
