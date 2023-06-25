@@ -17,6 +17,7 @@ setopt share_history
 # set alias
 exists exa && alias ls="exa"
 exists bat && alias cat="bat --theme=OneHalfDark"
+exists colordiff && alias diff="colordiff"
 
 # set env
 export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"

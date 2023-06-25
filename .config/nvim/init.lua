@@ -2,9 +2,9 @@
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
-vim.opt.tabstop = 2
+vim.opt.tabstop = 4
 vim.opt.shiftwidth = 0
-vim.opt.softtabstop = -1
+vim.opt.expandtab = true
 vim.opt.number = true
 vim.opt.termguicolors = true
 vim.opt.spell = true
@@ -264,15 +264,20 @@ require("lazy").setup({
   -- lsp indicator
   {
     "https://github.com/j-hui/fidget.nvim",
+    tag = "legacy",
     config = function()
       require("fidget").setup({})
     end
   },
 
   -- git integration
-  { 
+  {
     "TimUntersberger/neogit",
-    dependencies = { "nvim-lua/plenary.nvim" }
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      local neogit = require("neogit")
+      vim.keymap.set("n", "<Space>g", neogit.open)
+    end
   },
 
   -- git visualization
