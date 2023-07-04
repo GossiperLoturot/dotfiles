@@ -272,7 +272,7 @@ require("lazy").setup({
 
   -- git integration
   {
-    "TimUntersberger/neogit",
+    "NeogitOrg/neogit",
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local neogit = require("neogit")
