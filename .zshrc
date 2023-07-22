@@ -28,17 +28,17 @@ if exists nvim; then
 fi
 
 # bootstrap antigen
-if [ ! -r "$HOME/.antigen/antigen.zsh" ]; then
-  git clone "https://github.com/zsh-users/antigen" "$HOME/.antigen"
+if [ ! -r "$HOME/.zplug/init.zsh" ]; then
+  git clone "https://github.com/zplug/zplug" "$HOME/.zplug"
 fi
 
 # antigen
-if [ -r "$HOME/.antigen/antigen.zsh" ]; then
-  source "$HOME/.antigen/antigen.zsh"
+if [ -r "$HOME/.zplug/init.zsh" ]; then
+  source "$HOME/.zplug/init.zsh"
 
-  antigen bundle "zsh-users/zsh-syntax-highlighting"
+  zplug "zsh-users/zsh-syntax-highlighting"
   if exists fzf; then
-    antigen bundle "Aloxaf/fzf-tab"
+    zplug "Aloxaf/fzf-tab"
     zstyle ":completion:*:descriptions" format "[%d]"
     zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
     zstyle ":fzf-tab:*" single-group color header
@@ -46,7 +46,11 @@ if [ -r "$HOME/.antigen/antigen.zsh" ]; then
     zstyle ":fzf-tab:*" fzf-pad 4
   fi
 
-  antigen apply
+  if ! zplug check; then
+    zplug install
+  fi
+
+  zplug load
 fi
 
 # cargo
