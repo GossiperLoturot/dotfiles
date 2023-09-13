@@ -97,6 +97,17 @@ require("lazy").setup({
     config = function() require("nvim-autopairs").setup({ check_ts = true }) end
   },
 
+  -- ai code completions
+  {
+    "zbirenbaum/copilot.lua",
+    config = function()
+      require("copilot").setup({
+        suggestion = { enabled = true },
+        pannel = { enabled = false },
+      })
+    end
+  },
+
   -- completions
   {
     "hrsh7th/nvim-cmp",
@@ -106,23 +117,29 @@ require("lazy").setup({
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "f3fora/cmp-spell",
+      "zbirenbaum/copilot-cmp",
       "windwp/nvim-autopairs"
     },
     config = function()
       local cmp = require("cmp")
       local snip = require("luasnip")
+
+      -- ai code completions
+      require("copilot_cmp").setup({})
+
+      -- setup completions
       cmp.setup({
-        -- setup completions
         snippet = {
           expand = function(args)
             snip.lsp_expand(args.body)
           end
         },
         sources = cmp.config.sources({
-          { name = "luasnip" },
-          { name = "nvim_lsp" },
-          { name = "buffer" },
-          { name = "spell" }
+          { name = "copilot", group_index = 1 },
+          { name = "luasnip", group_index = 2 },
+          { name = "nvim_lsp", group_index = 2 },
+          { name = "buffer", group_index = 3 },
+          { name = "spell", group_index = 3 }
         }),
         mapping = {
           ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
@@ -138,9 +155,8 @@ require("lazy").setup({
           ["<C-d>"] = cmp.mapping.scroll_docs(1),
           ["<C-u>"] = cmp.mapping.scroll_docs(-1)
         },
-        completion = {
-          completeopt = "menu,menuone,noinsert"
-        }
+        completion = { completeopt = "menu,menuone,noinsert" },
+        experimental = { ghost_text = true }
       })
 
       -- completions + autopairs compability
@@ -276,6 +292,7 @@ require("lazy").setup({
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       local neogit = require("neogit")
+      neogit.setup({})
       vim.keymap.set("n", "<Space>g", neogit.open)
     end
   },
@@ -284,7 +301,7 @@ require("lazy").setup({
   {
     "lewis6991/gitsigns.nvim",
     config = function()
-      require('gitsigns').setup({})
+      require("gitsigns").setup({})
     end
   }
 },
