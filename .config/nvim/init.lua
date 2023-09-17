@@ -102,8 +102,9 @@ require("lazy").setup({
     "zbirenbaum/copilot.lua",
     config = function()
       require("copilot").setup({
-        suggestion = { enabled = true },
-        pannel = { enabled = false },
+        panel = { enabled = false },
+        suggestion = { auto_trigger = true },
+        filetypes = { markdown = true, gitcommit = true }
       })
     end
   },
@@ -117,15 +118,11 @@ require("lazy").setup({
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "f3fora/cmp-spell",
-      "zbirenbaum/copilot-cmp",
       "windwp/nvim-autopairs"
     },
     config = function()
       local cmp = require("cmp")
       local snip = require("luasnip")
-
-      -- ai code completions
-      require("copilot_cmp").setup({})
 
       -- setup completions
       cmp.setup({
@@ -135,8 +132,7 @@ require("lazy").setup({
           end
         },
         sources = cmp.config.sources({
-          { name = "copilot", group_index = 1 },
-          { name = "luasnip", group_index = 2 },
+          { name = "luasnip", group_index = 1 },
           { name = "nvim_lsp", group_index = 2 },
           { name = "buffer", group_index = 3 },
           { name = "spell", group_index = 3 }
@@ -156,7 +152,6 @@ require("lazy").setup({
           ["<C-u>"] = cmp.mapping.scroll_docs(-1)
         },
         completion = { completeopt = "menu,menuone,noinsert" },
-        experimental = { ghost_text = true }
       })
 
       -- completions + autopairs compability
@@ -198,19 +193,6 @@ require("lazy").setup({
           require("rust-tools").setup()
         end
       })
-    end
-  },
-
-  -- linter and formatter
-  {
-    "jose-elias-alvarez/null-ls.nvim",
-    dependencies = {
-      "williamboman/mason.nvim",
-      "jay-babu/mason-null-ls.nvim"
-    },
-    config = function()
-      require("mason-null-ls").setup({ handlers = {} })
-      require("null-ls").setup()
     end
   },
 
