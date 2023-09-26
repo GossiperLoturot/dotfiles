@@ -15,7 +15,7 @@ export SAVEHIST=1000000
 setopt share_history
 
 # set alias
-exists exa && alias ls="exa"
+exists eza && alias ls="eza"
 exists bat && alias cat="bat --theme=OneHalfDark"
 exists colordiff && alias diff="colordiff"
 
