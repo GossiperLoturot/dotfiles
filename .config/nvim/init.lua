@@ -99,6 +99,7 @@ require("lazy").setup({
     "hrsh7th/nvim-cmp",
     dependencies = {
       "L3MON4D3/LuaSnip",
+      "honza/vim-snippets",
       "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
@@ -109,7 +110,9 @@ require("lazy").setup({
     },
     config = function()
       local cmp = require("cmp")
+
       local snip = require("luasnip")
+      require("luasnip.loaders.from_snipmate").lazy_load()
 
       -- key mapping
       local mapping = {
