@@ -11,12 +11,6 @@ vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.opt.laststatus = 3
 
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "gx", vim.lsp.buf.declaration)
-vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float)
-vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename)
-vim.keymap.set("n", "<Space>l", vim.lsp.buf.format)
-
 -- bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -37,6 +31,9 @@ require("lazy").setup({
       vim.cmd([[highlight clear SpellLocal]])
       vim.cmd([[highlight QuickScopePrimary gui=underline guifg=#5fffff]])
       vim.cmd([[highlight QuickScopeSecondary gui=underline guifg=#ff5fff]])
+      vim.cmd([[highlight GitSignsAdd guifg=#98c379]])
+      vim.cmd([[highlight GitSignsChange guifg=#e5c07b]])
+      vim.cmd([[highlight GitSignsDelete guifg=#e06c75]])
     end
   },
 
@@ -46,7 +43,7 @@ require("lazy").setup({
   -- indent line
   {
     "lukas-reineke/indent-blankline.nvim",
-    config = function() require("indent_blankline").setup() end
+    config = function() require("ibl").setup({}) end
   },
 
   -- syntax analyzer
@@ -97,18 +94,6 @@ require("lazy").setup({
     config = function() require("nvim-autopairs").setup({ check_ts = true }) end
   },
 
-  -- ai code completions
-  {
-    "zbirenbaum/copilot.lua",
-    config = function()
-      require("copilot").setup({
-        panel = { enabled = false },
-        suggestion = { auto_trigger = true },
-        filetypes = { markdown = true, gitcommit = true }
-      })
-    end
-  },
-
   -- completions
   {
     "hrsh7th/nvim-cmp",
@@ -118,11 +103,38 @@ require("lazy").setup({
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
       "f3fora/cmp-spell",
+      "hrsh7th/cmp-cmdline",
+      "hrsh7th/cmp-nvim-lsp-document-symbol",
       "windwp/nvim-autopairs"
     },
     config = function()
       local cmp = require("cmp")
       local snip = require("luasnip")
+
+      -- key mapping
+      local mapping = {
+        ["<C-n>"] = {
+          i = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+          c = function() cmp.select_next_item({ behavior = cmp.SelectBehavior.Select }) end
+        },
+        ["<C-p>"] = {
+          i = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
+          c = function() cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select }) end
+        },
+        ["<Tab>"] = {
+          i = cmp.mapping.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert }),
+          c = function() cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert }) end
+        },
+        ["<C-d>"] = {
+          i = cmp.mapping.scroll_docs(1)
+        },
+        ["<C-u"] = {
+          i = cmp.mapping.scroll_docs(-1)
+        },
+        ["<S-Tab>"] = {
+          i = function() snip.expand_or_jump() end
+        }
+      }
 
       -- setup completions
       cmp.setup({
@@ -131,27 +143,31 @@ require("lazy").setup({
             snip.lsp_expand(args.body)
           end
         },
+        mapping = mapping,
         sources = cmp.config.sources({
           { name = "luasnip", group_index = 1 },
           { name = "nvim_lsp", group_index = 2 },
           { name = "buffer", group_index = 3 },
           { name = "spell", group_index = 3 }
         }),
-        mapping = {
-          ["<C-n>"] = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-          ["<C-p>"] = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-          ["<Tab>"] = cmp.mapping.confirm(),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if snip.expand_or_jumpable() then
-              snip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<C-d>"] = cmp.mapping.scroll_docs(1),
-          ["<C-u>"] = cmp.mapping.scroll_docs(-1)
-        },
         completion = { completeopt = "menu,menuone,noinsert" },
+      })
+
+      cmp.setup.cmdline("/", {
+        mapping = mapping,
+        sources = {
+          { name = "nvim_lsp_document_symbol", group_index = 1 },
+          { name = "buffer", group_index = 2 },
+          { name = "spell", group_index = 2 }
+        }
+      })
+
+      cmp.setup.cmdline(":", {
+        mapping = mapping,
+        sources = {
+          { name = "cmdline", group_index = 1 },
+          { name = "spell", group_index = 2 }
+        },
       })
 
       -- completions + autopairs compability
@@ -193,6 +209,20 @@ require("lazy").setup({
           require("rust-tools").setup()
         end
       })
+
+      -- diagnostics column sign
+      vim.fn.sign_define("DiagnosticSignInfo", { text = "*", texthl = "DiagnosticSignInfo" })
+      vim.fn.sign_define("DiagnosticSignHint", { text = "*", texthl = "DiagnosticSignHint" })
+      vim.fn.sign_define("DiagnosticSignWarn", { text = "*", texthl = "DiagnosticSignWarn" })
+      vim.fn.sign_define("DiagnosticSignError", { text = "*", texthl = "DiagnosticSignError" })
+
+      -- key mapping
+      vim.keymap.set("n", "K", vim.lsp.buf.hover)
+      vim.keymap.set("n", "gx", vim.lsp.buf.declaration)
+      vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float)
+      vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename)
+      vim.keymap.set("n", "<Space>l", vim.lsp.buf.format)
+
     end
   },
 
@@ -202,19 +232,9 @@ require("lazy").setup({
     dependencies = { "nvim-lua/plenary.nvim" },
     config = function()
       -- setup telescope
-      local actions = require("telescope.actions")
-      require("telescope").setup({
-        pickers = {
-          buffers = {
-            mappings = {
-              n = { ["<C-B>"] = actions.delete_buffer },
-              i = { ["<C-B>"] = actions.delete_buffer },
-            }
-          }
-        }
-      })
+      require("telescope").setup({})
 
-      -- mapping
+      -- key mapping
       local telescope = require("telescope.builtin")
       vim.keymap.set("n", "gd", telescope.lsp_definitions)
       vim.keymap.set("n", "gD", telescope.lsp_type_definitions)
@@ -231,6 +251,8 @@ require("lazy").setup({
   {
     "weilbith/nvim-code-action-menu",
     config = function()
+      vim.g.code_action_menu_show_diff = false
+
       local code_action_menu = require("code_action_menu")
       vim.keymap.set("n", "<Space>a", code_action_menu.open_code_action_menu)
     end
@@ -243,12 +265,13 @@ require("lazy").setup({
       require("nvim-tree").setup({
         renderer = {
           icons = {
-            show = {
-              file = false,
-              folder = false,
-              folder_arrow = false,
-              git = false,
-              modified = false,
+            glyphs = {
+              default = "",
+              symlink = "",
+              bookmark = "",
+              modified = "",
+              folder = { arrow_closed = "", arrow_open = "", default = "", open = "", empty = "", empty_open = "", symlink = "", symlink_open = "" },
+              git = { unstaged = "", staged = "", unmerged = "", renamed = "", untracked = "", deleted = "", ignored = "" }
             }
           }
         }
@@ -261,29 +284,29 @@ require("lazy").setup({
 
   -- lsp indicator
   {
-    "https://github.com/j-hui/fidget.nvim",
+    "j-hui/fidget.nvim",
     tag = "legacy",
-    config = function()
-      require("fidget").setup({})
-    end
-  },
-
-  -- git integration
-  {
-    "NeogitOrg/neogit",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      local neogit = require("neogit")
-      neogit.setup({})
-      vim.keymap.set("n", "<Space>g", neogit.open)
-    end
+    config = function() require("fidget").setup({}) end
   },
 
   -- git visualization
   {
     "lewis6991/gitsigns.nvim",
     config = function()
-      require("gitsigns").setup({})
+      local gitsigns = require("gitsigns")
+      gitsigns.setup({})
+
+      -- key mapping
+      vim.keymap.set("n", "<Space>hs", gitsigns.stage_hunk)
+      vim.keymap.set("n", "<Space>hr", gitsigns.reset_hunk)
+      vim.keymap.set("n", "<Space>hu", gitsigns.undo_stage_hunk)
+      vim.keymap.set("n", "<Space>hS", gitsigns.stage_buffer)
+      vim.keymap.set("n", "<Space>hR", gitsigns.reset_buffer)
+      vim.keymap.set("n", "<Space>hd", gitsigns.preview_hunk)
+      vim.keymap.set("n", "<Space>hD", gitsigns.diffthis)
+
+      vim.keymap.set("v", "<Space>hs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
+      vim.keymap.set("v", "<Space>hr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
     end
   }
 },
@@ -292,18 +315,22 @@ require("lazy").setup({
 {
   ui = {
     icons = {
-      cmd = "⌘",
-      config = "🛠",
-      event = "📅",
-      ft = "📂",
-      init = "⚙",
-      keys = "🗝",
-      plugin = "🔌",
-      runtime = "💻",
-      source = "📄",
-      start = "🚀",
-      task = "📌",
-      lazy = "💤",
+      cmd = "",
+      config = "",
+      event = "",
+      ft = "",
+      init = "",
+      import = "",
+      keys = "",
+      lazy = "",
+      loaded = "",
+      not_loaded = "",
+      plugin = "",
+      runtime = "",
+      source = "",
+      start = "",
+      task = "",
+      list = { "", "", "", "" }
     }
   }
 })
