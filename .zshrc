@@ -17,7 +17,7 @@ setopt share_history
 # set alias
 exists eza && alias ls="eza"
 exists bat && alias cat="bat --theme=OneHalfDark"
-exists colordiff && alias diff="colordiff"
+exists difft && alias diff="difft"
 
 # set env
 export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"
@@ -26,6 +26,7 @@ if exists nvim; then
   export EDITOR="nvim"
   export VISUAL="nvim"
 fi
+export GPG_TTY="$(tty)"
 
 # bootstrap antigen
 if [ ! -r "$HOME/.zplug/init.zsh" ]; then
