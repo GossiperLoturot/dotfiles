@@ -20,7 +20,8 @@ exists bat && alias cat="bat --theme=OneHalfDark"
 exists difft && alias diff="difft"
 
 # set env
-export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"
+# export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"
+export PROMPT="%F{cyan}%n@%m:%~ %# %F"
 export PAGER="less"
 if exists nvim; then
   export EDITOR="nvim"
@@ -74,3 +75,9 @@ if [ -r "$HOME/.bun" ]; then
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
 fi
+
+# ghc
+if [ -f "/home/main/.ghcup/env" ]; then
+    source "/home/main/.ghcup/env"
+fi
+
