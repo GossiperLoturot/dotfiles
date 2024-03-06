@@ -28,9 +28,9 @@ if exists nvim; then
 fi
 
 # gnupg
+gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 
 # bootstrap antigen
 if [ ! -r "$HOME/.zplug/init.zsh" ]; then
