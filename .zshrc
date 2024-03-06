@@ -20,14 +20,17 @@ exists bat && alias cat="bat --theme=OneHalfDark"
 exists difft && alias diff="difft"
 
 # set env
-# export PROMPT="$fg[cyan]%n@%m:%~ %# $reset_color"
 export PROMPT="%F{cyan}%n@%m:%~ %# %F"
 export PAGER="less"
 if exists nvim; then
   export EDITOR="nvim"
   export VISUAL="nvim"
 fi
+
+# gnupg
 export GPG_TTY="$(tty)"
+export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 
 # bootstrap antigen
 if [ ! -r "$HOME/.zplug/init.zsh" ]; then
@@ -59,15 +62,15 @@ fi
 if [ -r "$HOME/.cargo/env" ]; then
   source "$HOME/.cargo/env"
 
-	# sccache
-	if exists sccache; then
-		export RUSTC_WRAPPER="sccache"
-	fi
+  # sccache
+  if exists sccache; then
+    export RUSTC_WRAPPER="sccache"
+  fi
 
-	# mold
-	if exists mold; then
-		export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
-	fi
+  # mold
+  if exists mold; then
+    export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
+  fi
 fi
 
 # bun
@@ -78,6 +81,6 @@ fi
 
 # ghc
 if [ -f "/home/main/.ghcup/env" ]; then
-    source "/home/main/.ghcup/env"
+  source "/home/main/.ghcup/env"
 fi
 
