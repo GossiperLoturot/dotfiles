@@ -193,23 +193,19 @@ require("lazy").setup({
     dependencies = {
       "williamboman/mason.nvim",
       "williamboman/mason-lspconfig.nvim",
-      "hrsh7th/cmp-nvim-lsp",
-      "simrat39/rust-tools.nvim"
+      "hrsh7th/cmp-nvim-lsp"
     },
     config = function()
       require("mason-lspconfig").setup()
 
       -- lsp completion
-      local cap = require("cmp_nvim_lsp").default_capabilities(vim.lsp.protocol.make_client_capabilities())
+      local cap = require("cmp_nvim_lsp").default_capabilities()
 
       -- setup lsp
       local lsp_config = require("lspconfig")
       require("mason-lspconfig").setup_handlers({
         function(server_name)
           lsp_config[server_name].setup({ capabilities = cap })
-        end,
-        ["rust_analyzer"] = function()
-          require("rust-tools").setup()
         end
       })
 
@@ -288,7 +284,6 @@ require("lazy").setup({
   -- lsp indicator
   {
     "j-hui/fidget.nvim",
-    tag = "legacy",
     config = function() require("fidget").setup({}) end
   },
 
@@ -310,6 +305,17 @@ require("lazy").setup({
 
       vim.keymap.set("v", "<Space>hs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
       vim.keymap.set("v", "<Space>hr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
+    end
+  },
+
+  -- github copilot
+  {
+    "zbirenbaum/copilot.lua",
+    config = function()
+      require("copilot").setup({
+        panel = { enable = false },
+        suggestion = { enable = true, auto_trigger = true }
+      })
     end
   }
 },

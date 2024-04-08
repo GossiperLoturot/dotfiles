@@ -3,7 +3,9 @@
 # load features
 autoload -Uz compinit && compinit
 autoload -Uz colors && colors
-exists() { (( $+commands[$1] )) }
+
+# define functions wheather command exists or not.
+exists () { (( $+commands[$1] )) }
 
 # key binding
 bindkey -e
@@ -15,12 +17,13 @@ export SAVEHIST=1000000
 setopt share_history
 
 # set alias
+exists nvim && alias vi="nvim" && vim="nvim"
 exists eza && alias ls="eza"
-exists bat && alias cat="bat --theme=OneHalfDark"
+exists bat && alias cat="bat"
 exists difft && alias diff="difft"
 
 # set env
-export PROMPT="%F{cyan}%n@%m:%~ %# %F"
+export PROMPT="%F{cyan}%n@%m:%~ %# %f"
 export PAGER="less"
 if exists nvim; then
   export EDITOR="nvim"
@@ -32,30 +35,25 @@ gpg-connect-agent UPDATESTARTUPTTY /bye > /dev/null
 export GPG_TTY="$(tty)"
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 
-# bootstrap antigen
-if [ ! -r "$HOME/.zplug/init.zsh" ]; then
-  git clone "https://github.com/zplug/zplug" "$HOME/.zplug"
+# bootstrap zinit
+if [ ! -r "$HOME/.zinit/zinit.zsh" ]; then
+  git clone "https://github.com/zdharma-continuum/zinit" "$HOME/.zinit" --depth=1
 fi
 
-# antigen
-if [ -r "$HOME/.zplug/init.zsh" ]; then
-  source "$HOME/.zplug/init.zsh"
+# zinit
+if [ -r "$HOME/.zinit/zinit.zsh" ]; then
+  source "$HOME/.zinit/zinit.zsh"
 
-  zplug "zsh-users/zsh-syntax-highlighting"
+  zinit light "zsh-users/zsh-syntax-highlighting"
+
   if exists fzf; then
-    zplug "Aloxaf/fzf-tab"
+    zinit light "Aloxaf/fzf-tab"
     zstyle ":completion:*:descriptions" format "[%d]"
     zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
     zstyle ":fzf-tab:*" single-group color header
     zstyle ":fzf-tab:*" default-color ""
     zstyle ":fzf-tab:*" fzf-pad 4
   fi
-
-  if ! zplug check; then
-    zplug install
-  fi
-
-  zplug load
 fi
 
 # cargo
@@ -77,6 +75,7 @@ fi
 if [ -r "$HOME/.bun" ]; then
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
+  source "/home/main/.bun/_bun"
 fi
 
 # ghc
