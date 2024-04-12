@@ -227,33 +227,23 @@ require("lazy").setup({
 
   -- fuzzy finder
   {
-    "nvim-telescope/telescope.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    "ibhagwan/fzf-lua",
     config = function()
-      -- setup telescope
-      require("telescope").setup({})
+      -- setup fzf-lua
+      local fzf_lua = require("fzf-lua")
+
+      fzf_lua.setup({})
 
       -- key mapping
-      local telescope = require("telescope.builtin")
-      vim.keymap.set("n", "gd", telescope.lsp_definitions)
-      vim.keymap.set("n", "gD", telescope.lsp_type_definitions)
-      vim.keymap.set("n", "gi", telescope.lsp_implementations)
-      vim.keymap.set("n", "gr", telescope.lsp_references)
-      vim.keymap.set("n", "<Space>f", telescope.find_files)
-      vim.keymap.set("n", "<Space>F", telescope.live_grep)
-      vim.keymap.set("n", "<Space>b", telescope.buffers)
-      vim.keymap.set("n", "<Space>w", telescope.diagnostics)
-    end
-  },
-
-  -- code action
-  {
-    "weilbith/nvim-code-action-menu",
-    config = function()
-      vim.g.code_action_menu_show_diff = false
-
-      local code_action_menu = require("code_action_menu")
-      vim.keymap.set("n", "<Space>a", code_action_menu.open_code_action_menu)
+      vim.keymap.set("n", "gd", fzf_lua.lsp_definitions)
+      vim.keymap.set("n", "gD", fzf_lua.lsp_typedefs)
+      vim.keymap.set("n", "gi", fzf_lua.lsp_implementations)
+      vim.keymap.set("n", "gr", fzf_lua.lsp_references)
+      vim.keymap.set("n", "<space>a", fzf_lua.lsp_code_actions)
+      vim.keymap.set("n", "<Space>f", fzf_lua.files)
+      vim.keymap.set("n", "<Space>F", fzf_lua.live_grep)
+      vim.keymap.set("n", "<Space>b", fzf_lua.buffers)
+      vim.keymap.set("n", "<Space>w", fzf_lua.diagnostics_workspace)
     end
   },
 
@@ -322,6 +312,7 @@ require("lazy").setup({
 
 -- lazy configure
 {
+  defaults = { version = "*" },
   ui = {
     icons = {
       cmd = "",
