@@ -43,7 +43,13 @@ require("lazy").setup({
   -- indent line
   {
     "lukas-reineke/indent-blankline.nvim",
-    config = function() require("ibl").setup({}) end
+    config = function() require("ibl").setup() end
+  },
+
+  -- indent width auto-detection
+  {
+    "nmac427/guess-indent.nvim",
+    config = function() require("guess-indent").setup() end
   },
 
   -- syntax analyzer
@@ -67,12 +73,12 @@ require("lazy").setup({
 
   -- easily to jump
   {
-    "phaazon/hop.nvim",
+    "smoka7/hop.nvim",
     config = function()
       local hop = require("hop")
       hop.setup()
-      vim.keymap.set({ "n", "v", "o" }, "gw", hop.hint_words)
-      vim.keymap.set({ "n", "v", "o" }, "gl", hop.hint_lines_skip_whitespace)
+      vim.keymap.set({ "n", "v", "o" }, "gw", hop.hint_words, { desc = "hop words" })
+      vim.keymap.set({ "n", "v", "o" }, "gl", hop.hint_lines_skip_whitespace, { desc = "hop lines" })
     end
   },
 
@@ -103,9 +109,10 @@ require("lazy").setup({
       "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
-      "f3fora/cmp-spell",
+      "hrsh7th/cmp-path",
       "hrsh7th/cmp-cmdline",
       "hrsh7th/cmp-nvim-lsp-document-symbol",
+      "f3fora/cmp-spell",
       "windwp/nvim-autopairs"
     },
     config = function()
@@ -161,7 +168,7 @@ require("lazy").setup({
         sources = {
           { name = "nvim_lsp_document_symbol", group_index = 1 },
           { name = "buffer", group_index = 2 },
-          { name = "spell", group_index = 2 }
+          { name = "spell", group_index = 3 }
         }
       })
 
@@ -169,7 +176,8 @@ require("lazy").setup({
         mapping = mapping,
         sources = {
           { name = "cmdline", group_index = 1 },
-          { name = "spell", group_index = 2 }
+          { name = "path", group_index = 2 },
+          { name = "spell", group_index = 3 }
         },
       })
 
@@ -216,11 +224,10 @@ require("lazy").setup({
       vim.fn.sign_define("DiagnosticSignError", { text = "*", texthl = "DiagnosticSignError" })
 
       -- key mapping
-      vim.keymap.set("n", "K", vim.lsp.buf.hover)
-      vim.keymap.set("n", "gx", vim.lsp.buf.declaration)
-      vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float)
-      vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename)
-      vim.keymap.set("n", "<Space>l", vim.lsp.buf.format)
+      vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "hover lsp hint" })
+      vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float, { desc = "hover diagnostic" })
+      vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename, { desc = "run lsp rename" })
+      vim.keymap.set("n", "<Space>l", vim.lsp.buf.format, { desc = "run lsp format" })
 
     end
   },
@@ -232,22 +239,23 @@ require("lazy").setup({
       -- setup fzf-lua
       local fzf_lua = require("fzf-lua")
 
-      fzf_lua.setup({})
+      fzf_lua.setup()
 
       -- key mapping
-      vim.keymap.set("n", "gd", fzf_lua.lsp_definitions)
-      vim.keymap.set("n", "gD", fzf_lua.lsp_typedefs)
-      vim.keymap.set("n", "gi", fzf_lua.lsp_implementations)
-      vim.keymap.set("n", "gr", fzf_lua.lsp_references)
-      vim.keymap.set("n", "<space>a", fzf_lua.lsp_code_actions)
-      vim.keymap.set("n", "<Space>f", fzf_lua.files)
-      vim.keymap.set("n", "<Space>F", fzf_lua.live_grep)
-      vim.keymap.set("n", "<Space>b", fzf_lua.buffers)
-      vim.keymap.set("n", "<Space>w", fzf_lua.diagnostics_workspace)
+      vim.keymap.set("n", "gd", fzf_lua.lsp_definitions, { desc = "show lsp definitions" })
+      vim.keymap.set("n", "gD", fzf_lua.lsp_typedefs, { desc = "show lsp type definitions" })
+      vim.keymap.set("n", "gx", fzf_lua.lsp_declarations, { desc = "show lsp declaration" })
+      vim.keymap.set("n", "gi", fzf_lua.lsp_implementations, { desc = "show lsp implementations" })
+      vim.keymap.set("n", "gr", fzf_lua.lsp_references, { desc = "show lsp references" })
+      vim.keymap.set("n", "<space>a", fzf_lua.lsp_code_actions, { desc = "show lsp code actions" })
+      vim.keymap.set("n", "<Space>f", fzf_lua.files, { desc = "show file list" })
+      vim.keymap.set("n", "<Space>F", fzf_lua.live_grep, { desc = "show live grep" })
+      vim.keymap.set("n", "<Space>b", fzf_lua.buffers, { desc = "show buffer list" })
+      vim.keymap.set("n", "<Space>w", fzf_lua.diagnostics_workspace, { desc = "show diagnostics in workspace" })
     end
   },
 
-  -- filter
+  -- file tree
   {
     "nvim-tree/nvim-tree.lua",
     config = function()
@@ -267,14 +275,14 @@ require("lazy").setup({
       })
 
       local api = require("nvim-tree.api")
-      vim.keymap.set("n", "<Space>t", api.tree.toggle)
+      vim.keymap.set("n", "<Space>t", api.tree.toggle, { desc = "toggle file tree" })
     end
   },
 
   -- lsp indicator
   {
     "j-hui/fidget.nvim",
-    config = function() require("fidget").setup({}) end
+    config = function() require("fidget").setup() end
   },
 
   -- git visualization
@@ -282,19 +290,19 @@ require("lazy").setup({
     "lewis6991/gitsigns.nvim",
     config = function()
       local gitsigns = require("gitsigns")
-      gitsigns.setup({})
+      gitsigns.setup()
 
       -- key mapping
-      vim.keymap.set("n", "<Space>hs", gitsigns.stage_hunk)
-      vim.keymap.set("n", "<Space>hr", gitsigns.reset_hunk)
-      vim.keymap.set("n", "<Space>hu", gitsigns.undo_stage_hunk)
-      vim.keymap.set("n", "<Space>hS", gitsigns.stage_buffer)
-      vim.keymap.set("n", "<Space>hR", gitsigns.reset_buffer)
-      vim.keymap.set("n", "<Space>hd", gitsigns.preview_hunk)
-      vim.keymap.set("n", "<Space>hD", gitsigns.diffthis)
+      vim.keymap.set("n", "<Space>hs", gitsigns.stage_hunk, { desc = "stage hunk" })
+      vim.keymap.set("n", "<Space>hr", gitsigns.reset_hunk, { desc = "reset hunk" })
+      vim.keymap.set("n", "<Space>hu", gitsigns.undo_stage_hunk, { desc = "undo stage hunk" })
+      vim.keymap.set("n", "<Space>hS", gitsigns.stage_buffer, { desc = "stage buffer" })
+      vim.keymap.set("n", "<Space>hR", gitsigns.reset_buffer, { desc = "reset buffer" })
+      vim.keymap.set("n", "<Space>hd", gitsigns.preview_hunk, { desc = "preview hunk" })
+      vim.keymap.set("n", "<Space>hD", gitsigns.diffthis, { desc = "show diff this" })
 
-      vim.keymap.set("v", "<Space>hs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
-      vim.keymap.set("v", "<Space>hr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end)
+      vim.keymap.set("v", "<Space>hs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "stage hunk" })
+      vim.keymap.set("v", "<Space>hr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "reset hunk" })
     end
   },
 
