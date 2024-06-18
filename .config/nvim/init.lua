@@ -320,7 +320,6 @@ require("lazy").setup({
 
 -- lazy configure
 {
-  defaults = { version = "*" },
   ui = {
     icons = {
       cmd = "",
