@@ -10,6 +10,7 @@ vim.opt.termguicolors = true
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.opt.laststatus = 3
+vim.opt.cmdheight = 0
 
 -- bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -100,24 +101,39 @@ require("lazy").setup({
     config = function() require("nvim-autopairs").setup({ check_ts = true }) end
   },
 
-  -- completions
+  -- split one-line or join multi-line
+  {
+    "Wansmer/treesj",
+    config = function() require("treesj").setup() end
+  },
+
+  -- github copilot
+  {
+    "zbirenbaum/copilot.lua",
+    config = function()
+      require("copilot").setup({
+        panel = { enable = false },
+        suggestion = { enable = true, auto_trigger = true }
+      })
+    end
+  },
+
+  -- completion register
   {
     "hrsh7th/nvim-cmp",
     dependencies = {
-      "L3MON4D3/LuaSnip",
       "honza/vim-snippets",
+      "L3MON4D3/LuaSnip",
       "saadparwaiz1/cmp_luasnip",
       "hrsh7th/cmp-nvim-lsp",
       "hrsh7th/cmp-buffer",
-      "hrsh7th/cmp-path",
-      "hrsh7th/cmp-cmdline",
-      "hrsh7th/cmp-nvim-lsp-document-symbol",
       "f3fora/cmp-spell",
       "windwp/nvim-autopairs"
     },
     config = function()
       local cmp = require("cmp")
 
+      -- load snipet template
       local snip = require("luasnip")
       require("luasnip.loaders.from_snipmate").lazy_load()
 
@@ -125,15 +141,12 @@ require("lazy").setup({
       local mapping = {
         ["<C-n>"] = {
           i = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
-          c = function() cmp.select_next_item({ behavior = cmp.SelectBehavior.Select }) end
         },
         ["<C-p>"] = {
           i = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-          c = function() cmp.select_prev_item({ behavior = cmp.SelectBehavior.Select }) end
         },
         ["<Tab>"] = {
           i = cmp.mapping.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert }),
-          c = function() cmp.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert }) end
         },
         ["<C-d>"] = {
           i = cmp.mapping.scroll_docs(1)
@@ -163,24 +176,6 @@ require("lazy").setup({
         completion = { completeopt = "menu,menuone,noinsert" },
       })
 
-      cmp.setup.cmdline("/", {
-        mapping = mapping,
-        sources = {
-          { name = "nvim_lsp_document_symbol", group_index = 1 },
-          { name = "buffer", group_index = 2 },
-          { name = "spell", group_index = 3 }
-        }
-      })
-
-      cmp.setup.cmdline(":", {
-        mapping = mapping,
-        sources = {
-          { name = "cmdline", group_index = 1 },
-          { name = "path", group_index = 2 },
-          { name = "spell", group_index = 3 }
-        },
-      })
-
       -- completions + autopairs compability
       local cmp_autopairs = require("nvim-autopairs.completion.cmp")
       cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
@@ -195,7 +190,7 @@ require("lazy").setup({
     end
   },
 
-  -- lsp
+  -- lsp register
   {
     "neovim/nvim-lspconfig",
     dependencies = {
@@ -228,8 +223,13 @@ require("lazy").setup({
       vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float, { desc = "hover diagnostic" })
       vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename, { desc = "run lsp rename" })
       vim.keymap.set("n", "<Space>l", vim.lsp.buf.format, { desc = "run lsp format" })
-
     end
+  },
+
+  -- lsp indicator
+  {
+    "j-hui/fidget.nvim",
+    config = function() require("fidget").setup() end
   },
 
   -- fuzzy finder
@@ -279,41 +279,23 @@ require("lazy").setup({
     end
   },
 
-  -- lsp indicator
-  {
-    "j-hui/fidget.nvim",
-    config = function() require("fidget").setup() end
-  },
-
   -- git visualization
   {
     "lewis6991/gitsigns.nvim",
     config = function()
       local gitsigns = require("gitsigns")
-      gitsigns.setup()
+      gitsigns.setup({
+        signcolumn = false,
+        numhl = true,
+      })
 
       -- key mapping
-      vim.keymap.set("n", "<Space>hs", gitsigns.stage_hunk, { desc = "stage hunk" })
-      vim.keymap.set("n", "<Space>hr", gitsigns.reset_hunk, { desc = "reset hunk" })
-      vim.keymap.set("n", "<Space>hu", gitsigns.undo_stage_hunk, { desc = "undo stage hunk" })
-      vim.keymap.set("n", "<Space>hS", gitsigns.stage_buffer, { desc = "stage buffer" })
-      vim.keymap.set("n", "<Space>hR", gitsigns.reset_buffer, { desc = "reset buffer" })
-      vim.keymap.set("n", "<Space>hd", gitsigns.preview_hunk, { desc = "preview hunk" })
-      vim.keymap.set("n", "<Space>hD", gitsigns.diffthis, { desc = "show diff this" })
-
-      vim.keymap.set("v", "<Space>hs", function() gitsigns.stage_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "stage hunk" })
-      vim.keymap.set("v", "<Space>hr", function() gitsigns.reset_hunk({ vim.fn.line("."), vim.fn.line("v") }) end, { desc = "reset hunk" })
-    end
-  },
-
-  -- github copilot
-  {
-    "zbirenbaum/copilot.lua",
-    config = function()
-      require("copilot").setup({
-        panel = { enable = false },
-        suggestion = { enable = true, auto_trigger = true }
-      })
+      vim.keymap.set("n", "<Space>gs", gitsigns.stage_hunk, { desc = "stage/unstage hunk" })
+      vim.keymap.set("n", "<Space>gS", gitsigns.stage_buffer, { desc = "stage/unstage buffer" })
+      vim.keymap.set("n", "<Space>gr", gitsigns.reset_hunk, { desc = "reset hunk" })
+      vim.keymap.set("n", "<Space>gR", gitsigns.reset_buffer, { desc = "reset buffer" })
+      vim.keymap.set("n", "<Space>gd", gitsigns.preview_hunk_inline, { desc = "preview hunk" })
+      vim.keymap.set("n", "<Space>gD", gitsigns.diffthis, { desc = "show diff this" })
     end
   }
 },
@@ -341,3 +323,4 @@ require("lazy").setup({
     }
   }
 })
+
