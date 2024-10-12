@@ -2,15 +2,16 @@
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
+vim.opt.termguicolors = true
 vim.opt.tabstop = 4
 vim.opt.shiftwidth = 0
 vim.opt.expandtab = true
 vim.opt.number = true
-vim.opt.termguicolors = true
-vim.opt.spell = true
-vim.opt.spelllang = { "en_us" }
+vim.opt.signcolumn = "yes"
 vim.opt.laststatus = 3
 vim.opt.cmdheight = 0
+vim.opt.spell = true
+vim.opt.spelllang = { "en_us" }
 
 -- bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -19,11 +20,18 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- definitions
+local treesitter_servers = { "rust", "python", "typescript", "lua" }
+local language_servers = { "rust_analyzer", "pyright", "ts_ls", "lua_ls" }
+local linter_servers = { ["python"] = { "mypy" }, ["*"] = { "cspell" } }
+
 -- plugins
 require("lazy").setup({
   -- colorscheme
   {
     "GossiperLoturot/termin.vim",
+    lazy = false,
+    priority = 1000,
     config = function()
       vim.cmd([[colorscheme termin]])
       vim.cmd([[highlight clear SpellBad]])
@@ -58,6 +66,7 @@ require("lazy").setup({
     "nvim-treesitter/nvim-treesitter",
     config = function()
       require("nvim-treesitter.configs").setup({
+        ensure_installed = treesitter_servers,
         highlight = { enable = true },
         incremental_selection = {
           enable = true,
@@ -182,41 +191,44 @@ require("lazy").setup({
     end
   },
 
-  -- lsp and dap, linter, formatter installer
-  {
-    "williamboman/mason.nvim",
-    config = function()
-      require("mason").setup()
-    end
-  },
-
   -- lsp register
   {
     "neovim/nvim-lspconfig",
     dependencies = {
-      "williamboman/mason.nvim",
-      "williamboman/mason-lspconfig.nvim",
       "hrsh7th/cmp-nvim-lsp"
     },
     config = function()
-      require("mason-lspconfig").setup()
-
       -- lsp completion
       local cap = require("cmp_nvim_lsp").default_capabilities()
 
       -- setup lsp
-      local lsp_config = require("lspconfig")
-      require("mason-lspconfig").setup_handlers({
-        function(server_name)
-          lsp_config[server_name].setup({ capabilities = cap })
+      local lspconfig = require("lspconfig")
+
+      for _, language_server in ipairs(language_servers) do
+        local cmd = lspconfig[language_server].config_def.default_config.cmd
+
+        -- check available lsp server
+        if not cmd or vim.fn.executable(cmd[1]) ~= 0 then
+          lspconfig[language_server].setup({ capabilities = cap })
         end
-      })
+      end
 
       -- diagnostics column sign
-      vim.fn.sign_define("DiagnosticSignInfo", { text = "*", texthl = "DiagnosticSignInfo" })
-      vim.fn.sign_define("DiagnosticSignHint", { text = "*", texthl = "DiagnosticSignHint" })
-      vim.fn.sign_define("DiagnosticSignWarn", { text = "*", texthl = "DiagnosticSignWarn" })
-      vim.fn.sign_define("DiagnosticSignError", { text = "*", texthl = "DiagnosticSignError" })
+      local suffix_fn = function(diagnostic)
+        return string.format(" [%s.%s]", diagnostic.source, diagnostic.code)
+      end
+      vim.diagnostic.config({
+        float = { suffix = suffix_fn },
+        virtual_text = { suffix = suffix_fn },
+        signs = {
+          text = {
+            [vim.diagnostic.severity.ERROR] = "|",
+            [vim.diagnostic.severity.WARN] = "|",
+            [vim.diagnostic.severity.INFO] = "|",
+            [vim.diagnostic.severity.HINT] = "|"
+          }
+        }
+      })
 
       -- key mapping
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "hover lsp hint" })
@@ -226,7 +238,51 @@ require("lazy").setup({
     end
   },
 
-  -- lsp indicator
+  -- linter register
+  {
+    "mfussenegger/nvim-lint",
+    config = function()
+      local lint = require("lint")
+
+      -- setup linter
+      local linters_by_ft = {}
+      local linters_any = {}
+      for language, linter_servers_by_ft in pairs(linter_servers) do
+        for _, linter_server in ipairs(linter_servers_by_ft) do
+          local cmd = lint.linters[linter_server].cmd
+
+          -- check available linter server
+          if vim.fn.executable(cmd) ~= 0 then
+            if language == "*" then
+              -- linter any
+              table.insert(linters_any, linter_server)
+            else
+              -- linter by ft
+
+              if not linters_by_ft[language] then
+                linters_by_ft[language] = {}
+              end
+
+              table.insert(linters_by_ft[language], linter_server)
+            end
+          end
+        end
+      end
+
+      -- autocmd mapping
+      lint.linters_by_ft = linters_by_ft
+      vim.api.nvim_create_autocmd({ "BufReadPost", "BufWritePost" }, {
+        callback = function()
+          lint.try_lint()
+          for _, linter in ipairs(linters_any) do
+            lint.try_lint(linter)
+          end
+        end
+      })
+    end
+  },
+
+  -- notify indicator
   {
     "j-hui/fidget.nvim",
     config = function() require("fidget").setup() end

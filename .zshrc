@@ -56,6 +56,11 @@ if [ -r "$HOME/.zinit/zinit.zsh" ]; then
   fi
 fi
 
+# user binaries
+if [ -r "$HOME/.local/bin" ]; then
+  export PATH="$HOME/.local/bin:$PATH"
+fi
+
 # cargo
 if [ -r "$HOME/.cargo/env" ]; then
   source "$HOME/.cargo/env"
@@ -76,10 +81,5 @@ if [ -r "$HOME/.bun" ]; then
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
   source "/home/main/.bun/_bun"
-fi
-
-# ghc
-if [ -f "/home/main/.ghcup/env" ]; then
-  source "/home/main/.ghcup/env"
 fi
 
