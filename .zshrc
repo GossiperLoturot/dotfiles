@@ -17,10 +17,9 @@ export SAVEHIST=1000000
 setopt share_history
 
 # set alias
-exists nvim && alias vi="nvim" && vim="nvim"
+exists nvim && alias vi="nvim" && alias vim="nvim"
 exists eza && alias ls="eza"
 exists bat && alias cat="bat"
-exists difft && alias diff="difft"
 
 # set env
 export PROMPT="%F{cyan}%n@%m:%~ %# %f"
@@ -49,9 +48,8 @@ if [ -r "$HOME/.zinit/zinit.zsh" ]; then
   if exists fzf; then
     zinit light "Aloxaf/fzf-tab"
     zstyle ":completion:*:descriptions" format "[%d]"
-    zstyle ":fzf-tab:*" fzf-flags "--border" "--color=dark"
+    zstyle ":fzf-tab:*" fzf-flags "--border=sharp" "--color=dark"
     zstyle ":fzf-tab:*" single-group color header
-    zstyle ":fzf-tab:*" default-color ""
     zstyle ":fzf-tab:*" fzf-pad 4
   fi
 fi

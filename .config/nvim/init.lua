@@ -21,9 +21,13 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- definitions
-local treesitter_servers = { "rust", "python", "typescript", "lua" }
+local treesitter_servers = { "rust", "python", "typescript", "lua", "bash" }
 local language_servers = { "rust_analyzer", "pyright", "ts_ls", "lua_ls" }
-local linter_servers = { ["python"] = { "mypy" }, ["*"] = { "cspell" } }
+local linter_servers = {
+  ["python"] = { "ruff", "mypy" },
+  ["bash"] = { "shellcheck", "bash" },
+  ["typescript"] = { "biomejs", "eslint" }
+}
 
 -- plugins
 require("lazy").setup({
@@ -250,6 +254,12 @@ require("lazy").setup({
       for language, linter_servers_by_ft in pairs(linter_servers) do
         for _, linter_server in ipairs(linter_servers_by_ft) do
           local cmd = lint.linters[linter_server].cmd
+
+          -- if cmd is function, call it
+          -- for example, biomejs, eslint, etc.
+          if type(cmd) == "function" then
+            cmd = cmd()
+          end
 
           -- check available linter server
           if vim.fn.executable(cmd) ~= 0 then
