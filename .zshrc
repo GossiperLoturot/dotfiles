@@ -78,6 +78,6 @@ fi
 if [ -r "$HOME/.bun" ]; then
   export BUN_INSTALL="$HOME/.bun"
   export PATH="$BUN_INSTALL/bin:$PATH"
-  source "/home/main/.bun/_bun"
+  source "$HOME/.bun/_bun"
 fi
 

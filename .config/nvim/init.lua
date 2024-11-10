@@ -326,6 +326,7 @@ require("lazy").setup({
     "nvim-tree/nvim-tree.lua",
     config = function()
       require("nvim-tree").setup({
+        view = { side = "right" },
         renderer = {
           icons = {
             glyphs = {
