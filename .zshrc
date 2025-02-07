@@ -65,7 +65,7 @@ if [ -r "$HOME/.cargo/env" ]; then
 
   # sccache
   if exists sccache; then
-    sccahe --start-server 1>& /dev/null
+    sccache --start-server 1>& /dev/null
     export RUSTC_WRAPPER="sccache"
   fi
 
