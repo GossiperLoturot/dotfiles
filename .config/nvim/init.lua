@@ -12,6 +12,10 @@ vim.opt.laststatus = 3
 vim.opt.cmdheight = 0
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
+vim.opt.foldmethod = "expr"
+vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldlevel = 99
+
 
 -- bootstrap
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
