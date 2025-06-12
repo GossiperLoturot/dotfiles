@@ -25,8 +25,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- definitions
-local treesitter_servers = { "rust", "python", "typescript", "lua", "bash" }
-local language_servers = { "rust_analyzer", "pyright", "ts_ls", "lua_ls" }
+local treesitter_servers = { "cpp", "rust", "python", "typescript", "lua", "bash" }
+local language_servers = { "ccls", "rust_analyzer", "pyright", "ts_ls", "lua_ls" }
 local linter_servers = {
   ["python"] = { "ruff", "mypy" },
   ["bash"] = { "shellcheck", "bash" },
@@ -309,7 +309,11 @@ require("lazy").setup({
       -- setup fzf-lua
       local fzf_lua = require("fzf-lua")
 
-      fzf_lua.setup()
+      fzf_lua.setup({
+        lsp = {
+          symbols = { symbol_style = 3 }
+        }
+      })
 
       -- key mapping
       vim.keymap.set("n", "gd", fzf_lua.lsp_definitions, { desc = "show lsp definitions" })
@@ -321,6 +325,7 @@ require("lazy").setup({
       vim.keymap.set("n", "<Space>f", fzf_lua.files, { desc = "show file list" })
       vim.keymap.set("n", "<Space>F", fzf_lua.live_grep, { desc = "show live grep" })
       vim.keymap.set("n", "<Space>b", fzf_lua.buffers, { desc = "show buffer list" })
+      vim.keymap.set("n", "<Space>o", fzf_lua.lsp_document_symbols, { desc = "show symbols in document" })
       vim.keymap.set("n", "<Space>w", fzf_lua.diagnostics_workspace, { desc = "show diagnostics in workspace" })
     end
   },
@@ -331,6 +336,7 @@ require("lazy").setup({
     config = function()
       require("nvim-tree").setup({
         view = { side = "right" },
+        sync_root_with_cwd = true,
         renderer = {
           icons = {
             glyphs = {
@@ -367,6 +373,22 @@ require("lazy").setup({
       vim.keymap.set("n", "<Space>gR", gitsigns.reset_buffer, { desc = "reset buffer" })
       vim.keymap.set("n", "<Space>gd", gitsigns.preview_hunk_inline, { desc = "preview hunk" })
       vim.keymap.set("n", "<Space>gD", gitsigns.diffthis, { desc = "show diff this" })
+    end
+  },
+
+  -- toggleterm
+  {
+    "akinsho/toggleterm.nvim",
+    config = function()
+      require("toggleterm").setup({
+        open_mapping = [[<C-\>]],
+        shade_terminals = false,
+        start_in_insert = false,
+        persist_mode = false
+      })
+
+      -- key mapping
+      vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "exit terminal" })
     end
   }
 },
