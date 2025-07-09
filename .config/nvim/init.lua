@@ -15,6 +15,7 @@ vim.opt.spelllang = { "en_us" }
 vim.opt.foldmethod = "expr"
 vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
 vim.opt.foldlevel = 99
+vim.opt.mouse = ''
 
 
 -- bootstrap
@@ -25,8 +26,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- definitions
-local treesitter_servers = { "cpp", "rust", "python", "typescript", "lua", "bash" }
-local language_servers = { "ccls", "rust_analyzer", "pyright", "ts_ls", "lua_ls" }
+local treesitter_servers = { "cpp", "rust", "c_sharp", "python", "typescript", "lua", "bash" }
+local language_servers = { "ccls", "rust_analyzer", "csharp_ls", "pyright", "ts_ls", "lua_ls" }
 local linter_servers = {
   ["python"] = { "ruff", "mypy" },
   ["bash"] = { "shellcheck", "bash" },
