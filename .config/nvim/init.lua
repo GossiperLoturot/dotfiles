@@ -211,16 +211,17 @@ require("lazy").setup({
       local cap = require("cmp_nvim_lsp").default_capabilities()
 
       -- setup lsp
-      local lspconfig = require("lspconfig")
+      vim.lsp.config("*", { capabilities = cap })
+      vim.lsp.enable(language_servers)
 
-      for _, language_server in ipairs(language_servers) do
-        local cmd = lspconfig[language_server].config_def.default_config.cmd
-
-        -- check available lsp server
-        if not cmd or vim.fn.executable(cmd[1]) ~= 0 then
-          lspconfig[language_server].setup({ capabilities = cap })
-        end
-      end
+      -- for _, language_server in ipairs(language_servers) do
+      --   local cmd = lspconfig[language_server].config_def.default_config.cmd
+      --
+      --   -- check available lsp server
+      --   if not cmd or vim.fn.executable(cmd[1]) ~= 0 then
+      --     lspconfig[language_server].setup({ capabilities = cap })
+      --   end
+      -- end
 
       -- diagnostics column sign
       local suffix_fn = function(diagnostic)
