@@ -13,9 +13,9 @@ vim.opt.cmdheight = 0
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "nvim_treesitter#foldexpr()"
+vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.opt.foldlevel = 99
-vim.opt.mouse = ''
+vim.opt.mouse = ""
 
 
 -- bootstrap
@@ -29,6 +29,8 @@ vim.opt.rtp:prepend(lazypath)
 local treesitter_servers = { "cpp", "rust", "c_sharp", "python", "typescript", "lua", "bash" }
 local language_servers = { "ccls", "rust_analyzer", "csharp_ls", "pyright", "ts_ls", "lua_ls" }
 local linter_servers = {
+  ["cpp"] = { "cpplint" },
+  ["rust"] = { "clippy" },
   ["python"] = { "ruff", "mypy" },
   ["bash"] = { "shellcheck", "bash" },
   ["typescript"] = { "biomejs", "eslint" }
@@ -130,6 +132,7 @@ require("lazy").setup({
     "zbirenbaum/copilot.lua",
     config = function()
       require("copilot").setup({
+        filetypes = { ["*"] = true },
         panel = { enable = false },
         suggestion = { enable = true, auto_trigger = true }
       })
@@ -214,15 +217,6 @@ require("lazy").setup({
       vim.lsp.config("*", { capabilities = cap })
       vim.lsp.enable(language_servers)
 
-      -- for _, language_server in ipairs(language_servers) do
-      --   local cmd = lspconfig[language_server].config_def.default_config.cmd
-      --
-      --   -- check available lsp server
-      --   if not cmd or vim.fn.executable(cmd[1]) ~= 0 then
-      --     lspconfig[language_server].setup({ capabilities = cap })
-      --   end
-      -- end
-
       -- diagnostics column sign
       local suffix_fn = function(diagnostic)
         return string.format(" [%s.%s]", diagnostic.source, diagnostic.code)
@@ -244,7 +238,7 @@ require("lazy").setup({
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "hover lsp hint" })
       vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float, { desc = "hover diagnostic" })
       vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename, { desc = "run lsp rename" })
-      vim.keymap.set("n", "<Space>l", vim.lsp.buf.format, { desc = "run lsp format" })
+      -- vim.keymap.set("n", "<Space>l", vim.lsp.buf.format, { desc = "run lsp format" })
     end
   },
 
@@ -375,22 +369,6 @@ require("lazy").setup({
       vim.keymap.set("n", "<Space>gR", gitsigns.reset_buffer, { desc = "reset buffer" })
       vim.keymap.set("n", "<Space>gd", gitsigns.preview_hunk_inline, { desc = "preview hunk" })
       vim.keymap.set("n", "<Space>gD", gitsigns.diffthis, { desc = "show diff this" })
-    end
-  },
-
-  -- toggleterm
-  {
-    "akinsho/toggleterm.nvim",
-    config = function()
-      require("toggleterm").setup({
-        open_mapping = [[<C-\>]],
-        shade_terminals = false,
-        start_in_insert = false,
-        persist_mode = false
-      })
-
-      -- key mapping
-      vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { desc = "exit terminal" })
     end
   }
 },
