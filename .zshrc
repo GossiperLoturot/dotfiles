@@ -13,8 +13,10 @@ bindkey -e
 # history
 export HISTFILE="$HOME/.zhistfile"
 export HISTSIZE=1000
-export SAVEHIST=1000000
+export SAVEHIST=10000
 setopt share_history
+setopt hist_ignore_dups
+setopt EXTENDED_HISTORY
 
 # set alias
 exists nvim && alias vi="nvim" && alias vim="nvim"

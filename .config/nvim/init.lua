@@ -12,9 +12,6 @@ vim.opt.laststatus = 3
 vim.opt.cmdheight = 0
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
-vim.opt.foldmethod = "expr"
-vim.opt.foldexpr = "v:lua.vim.treesitter.foldexpr()"
-vim.opt.foldlevel = 99
 vim.opt.mouse = ""
 
 
@@ -76,18 +73,13 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        ensure_installed = treesitter_servers,
-        highlight = { enable = true },
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "gn",
-            node_incremental = "ii",
-            scope_incremental = "iI",
-            node_decremental = "id"
-          }
-        }
+      require("nvim-treesitter").install(treesitter_servers)
+
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = treesitter_servers,
+        callback = function()
+          vim.treesitter.start()
+        end
       })
     end
   },
@@ -127,91 +119,37 @@ require("lazy").setup({
     config = function() require("treesj").setup() end
   },
 
-  -- github copilot
-  {
-    "zbirenbaum/copilot.lua",
-    config = function()
-      require("copilot").setup({
-        filetypes = { ["*"] = true },
-        panel = { enable = false },
-        suggestion = { enable = true, auto_trigger = true }
-      })
-    end
-  },
-
   -- completion register
   {
-    "hrsh7th/nvim-cmp",
-    dependencies = {
-      "honza/vim-snippets",
-      "L3MON4D3/LuaSnip",
-      "saadparwaiz1/cmp_luasnip",
-      "hrsh7th/cmp-nvim-lsp",
-      "hrsh7th/cmp-buffer",
-      "f3fora/cmp-spell",
-      "windwp/nvim-autopairs"
-    },
+    "saghen/blink.cmp",
+    version = "*",
     config = function()
-      local cmp = require("cmp")
-
-      -- load snipet template
-      local snip = require("luasnip")
-      require("luasnip.loaders.from_snipmate").lazy_load()
-
-      -- key mapping
-      local mapping = {
-        ["<C-n>"] = {
-          i = cmp.mapping.select_next_item({ behavior = cmp.SelectBehavior.Select }),
+      require("blink.cmp").setup({
+        keymap = { preset = "super-tab" },
+        completion = {
+          list = { selection = { auto_insert = false } },
+          documentation = { auto_show = true, auto_show_delay_ms = 0 },
+          menu = { draw = { columns = { { "label", "label_description", gap = 1 }, { "kind", "source_name", gap = 1 } } } },
+          ghost_text = { enabled = true },
         },
-        ["<C-p>"] = {
-          i = cmp.mapping.select_prev_item({ behavior = cmp.SelectBehavior.Select }),
-        },
-        ["<Tab>"] = {
-          i = cmp.mapping.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert }),
-        },
-        ["<C-d>"] = {
-          i = cmp.mapping.scroll_docs(1)
-        },
-        ["<C-u"] = {
-          i = cmp.mapping.scroll_docs(-1)
-        },
-        ["<S-Tab>"] = {
-          i = function() snip.expand_or_jump() end
+        cmdline = {
+          keymap = { preset = "inherit" },
+          completion = {
+            menu = { auto_show = true },
+            list = { selection = { auto_insert = false } },
+          }
         }
-      }
-
-      -- setup completions
-      cmp.setup({
-        snippet = {
-          expand = function(args)
-            snip.lsp_expand(args.body)
-          end
-        },
-        mapping = mapping,
-        sources = cmp.config.sources({
-          { name = "luasnip", group_index = 1 },
-          { name = "nvim_lsp", group_index = 2 },
-          { name = "buffer", group_index = 3 },
-          { name = "spell", group_index = 3 }
-        }),
-        completion = { completeopt = "menu,menuone,noinsert" },
       })
-
-      -- completions + autopairs compability
-      local cmp_autopairs = require("nvim-autopairs.completion.cmp")
-      cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
     end
   },
 
   -- lsp register
   {
     "neovim/nvim-lspconfig",
-    dependencies = {
-      "hrsh7th/cmp-nvim-lsp"
-    },
+    dependencies = { "saghen/blink.cmp" },
     config = function()
       -- lsp completion
-      local cap = require("cmp_nvim_lsp").default_capabilities()
+      local cap = require("blink.cmp").get_lsp_capabilities({})
 
       -- setup lsp
       vim.lsp.config("*", { capabilities = cap })
@@ -238,7 +176,6 @@ require("lazy").setup({
       vim.keymap.set("n", "K", vim.lsp.buf.hover, { desc = "hover lsp hint" })
       vim.keymap.set("n", "<Space>K", vim.diagnostic.open_float, { desc = "hover diagnostic" })
       vim.keymap.set("n", "<Space>r", vim.lsp.buf.rename, { desc = "run lsp rename" })
-      -- vim.keymap.set("n", "<Space>l", vim.lsp.buf.format, { desc = "run lsp format" })
     end
   },
 
