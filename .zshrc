@@ -61,6 +61,10 @@ if [ -r "$HOME/.local/bin" ]; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
 
+if exists zoxide; then
+  eval "$(zoxide init zsh --cmd cd)"
+fi
+
 # wsl cfg
 if uname -a | grep -q microsoft; then
   echo "[WSL Detected] Setting up zsh config for WSL."
@@ -71,11 +75,11 @@ fi
 if [ -r "$HOME/.cargo/env" ]; then
   source "$HOME/.cargo/env"
 
-  # sccache
-  if exists sccache; then
-    sccache --start-server 1>& /dev/null
-    export RUSTC_WRAPPER="sccache"
-  fi
+  # # sccache
+  # if exists sccache; then
+  #   sccache --start-server 1>& /dev/null
+  #   export RUSTC_WRAPPER="sccache"
+  # fi
 
   # mold
   if exists mold; then
@@ -89,22 +93,4 @@ if [ -r "$HOME/.bun" ]; then
   export PATH="$BUN_INSTALL/bin:$PATH"
   source "$HOME/.bun/_bun"
 fi
-
-# duckdb
-if [ -r "$HOME/.duckdb/cli/latest/duckdb" ]; then
-  export PATH="$HOME/.duckdb/cli/latest/duckdb:$PATH"
-fi
-
-# >>> mamba initialize >>>
-# !! Contents within this block are managed by 'micromamba shell init' !!
-export MAMBA_EXE='/home/main/.local/bin/micromamba';
-export MAMBA_ROOT_PREFIX='/home/main/micromamba';
-__mamba_setup="$("$MAMBA_EXE" shell hook --shell zsh --root-prefix "$MAMBA_ROOT_PREFIX" 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__mamba_setup"
-else
-    alias micromamba="$MAMBA_EXE"  # Fallback on help from micromamba activate
-fi
-unset __mamba_setup
-# <<< mamba initialize <<<
 

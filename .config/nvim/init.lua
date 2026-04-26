@@ -13,6 +13,7 @@ vim.opt.cmdheight = 0
 vim.opt.spell = true
 vim.opt.spelllang = { "en_us" }
 vim.opt.mouse = ""
+vim.opt.undofile = true
 
 
 -- bootstrap
@@ -123,20 +124,34 @@ require("lazy").setup({
   {
     "saghen/blink.cmp",
     version = "*",
+    dependencies = { "Kaiser-Yang/blink-cmp-dictionary" },
     config = function()
       require("blink.cmp").setup({
         keymap = { preset = "super-tab" },
         completion = {
           list = { selection = { auto_insert = false } },
           documentation = { auto_show = true, auto_show_delay_ms = 0 },
-          menu = { draw = { columns = { { "label", "label_description", gap = 1 }, { "kind", "source_name", gap = 1 } } } },
-          ghost_text = { enabled = true },
+          menu = { draw = { columns = {
+            { "label", "label_description", gap = 1 },
+            { "kind", "source_name", gap = 1 },
+          } } }
+        },
+        sources = {
+          default = { "lsp", "path", "snippets", "buffer", "dictionary" },
+          providers = { dictionary = {
+            module = "blink-cmp-dictionary",
+            name = "Dict",
+            async = true,
+            score_offset = -1000,
+            max_items = 8,
+            opts = { dictionary_files = { "/usr/share/dict/words" } },
+          } },
         },
         cmdline = {
           keymap = { preset = "inherit" },
           completion = {
             menu = { auto_show = true },
-            list = { selection = { auto_insert = false } },
+            list = { selection = { auto_insert = false } }
           }
         }
       })
