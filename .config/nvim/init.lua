@@ -25,7 +25,7 @@ vim.opt.rtp:prepend(lazypath)
 
 -- definitions
 local treesitter_servers = { "cpp", "rust", "c_sharp", "python", "typescript", "lua", "bash" }
-local language_servers = { "ccls", "rust_analyzer", "csharp_ls", "pyright", "ts_ls", "lua_ls" }
+local language_servers = { "clangd", "rust_analyzer", "csharp_ls", "pyright", "ts_ls", "lua_ls" }
 local linter_servers = {
   ["cpp"] = { "cpplint" },
   ["rust"] = { "clippy" },
@@ -168,6 +168,7 @@ require("lazy").setup({
 
       -- setup lsp
       vim.lsp.config("*", { capabilities = cap })
+      vim.lsp.config("clangd", { cmd = { "clangd", "--background-index", "--clang-tidy", "--completion-style=detailed", "--header-insertion=iwyu" } })
       vim.lsp.enable(language_servers)
 
       -- diagnostics column sign
@@ -220,11 +221,9 @@ require("lazy").setup({
               table.insert(linters_any, linter_server)
             else
               -- linter by ft
-
               if not linters_by_ft[language] then
                 linters_by_ft[language] = {}
               end
-
               table.insert(linters_by_ft[language], linter_server)
             end
           end
@@ -254,14 +253,13 @@ require("lazy").setup({
   {
     "ibhagwan/fzf-lua",
     config = function()
-      -- setup fzf-lua
       local fzf_lua = require("fzf-lua")
-
       fzf_lua.setup({
         lsp = {
           symbols = { symbol_style = 3 }
         }
       })
+      fzf_lua.register_ui_select()
 
       -- key mapping
       vim.keymap.set("n", "gd", fzf_lua.lsp_definitions, { desc = "show lsp definitions" })
@@ -301,6 +299,41 @@ require("lazy").setup({
 
       local api = require("nvim-tree.api")
       vim.keymap.set("n", "<Space>t", api.tree.toggle, { desc = "toggle file tree" })
+    end
+  },
+
+  -- github copilot
+  {
+    "zbirenbaum/copilot.lua",
+    version = "v2.0.4",
+    config = function()
+      require("copilot").setup({
+        panel = { enable = false },
+        suggestion = { enable = true, auto_trigger = true }
+      })
+    end
+  },
+
+  -- github copilot chat
+  {
+    "CopilotC-Nvim/CopilotChat.nvim",
+    dependencies = { "nvim-lua/plenary.nvim" },
+    config = function()
+      require("CopilotChat").setup({
+        model = "gpt-5-mini"
+      })
+      vim.keymap.set("n", "<Space>x", "<CMD>CopilotChatToggle<CR>", { desc = "toggle chat" })
+    end
+  },
+
+  -- task runner
+  {
+    "stevearc/overseer.nvim",
+    config = function()
+      local overseer = require("overseer")
+      overseer.setup({ templates = { "builtin", "meson-build", "meson-compile", "meson-test" } })
+      vim.keymap.set("n", "<Space>q", "<CMD>OverseerRun<CR>", { desc = "run task" })
+      vim.keymap.set("n", "<Space>Q", "<CMD>OverseerToggle<CR>", { desc = "toggle task list" })
     end
   },
 

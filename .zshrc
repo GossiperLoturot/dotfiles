@@ -87,10 +87,3 @@ if [ -r "$HOME/.cargo/env" ]; then
   fi
 fi
 
-# bun
-if [ -r "$HOME/.bun" ]; then
-  export BUN_INSTALL="$HOME/.bun"
-  export PATH="$BUN_INSTALL/bin:$PATH"
-  source "$HOME/.bun/_bun"
-fi
-
