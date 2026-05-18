@@ -24,21 +24,32 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 -- definitions
-local treesitter_servers = { "cpp", "rust", "c_sharp", "python", "typescript", "lua", "bash" }
-local language_servers = { "clangd", "rust_analyzer", "csharp_ls", "pyright", "ts_ls", "lua_ls" }
+local treesitter_servers = { "cpp", "rust", "c_sharp", "python", "typescript", "lua", "bash", "diff" }
+local language_servers = {
+  ["clangd"] = { cmd = { "clangd", "--background-index", "--clang-tidy", "--completion-style=detailed", "--header-insertion=iwyu" } },
+  ["rust_analyzer"] = {},
+  ["csharp_ls"] = {},
+  ["pyright"] = {},
+  ["ts_ls"] = {},
+  ["lua_ls"] = {}
+}
 local linter_servers = {
   ["cpp"] = { "cpplint" },
   ["rust"] = { "clippy" },
   ["python"] = { "ruff", "mypy" },
-  ["bash"] = { "shellcheck", "bash" },
-  ["typescript"] = { "biomejs", "eslint" }
+  ["typescript"] = { "biomejs", "eslint" },
+  ["lua"] = { "luacheck" },
+  ["bash"] = { "shellcheck", "bash" }
 }
+local task_templates = { "builtin", "meson-build", "meson-compile", "meson-test" }
+
 
 -- plugins
 require("lazy").setup({
   -- colorscheme
   {
     "GossiperLoturot/termin.vim",
+    version = "*",
     lazy = false,
     priority = 1000,
     config = function()
@@ -56,23 +67,29 @@ require("lazy").setup({
   },
 
   -- highligt f jump char
-  { "unblevable/quick-scope" },
+  {
+    "unblevable/quick-scope",
+    version = "*"
+  },
 
   -- indent line
   {
     "lukas-reineke/indent-blankline.nvim",
+    version = "*",
     config = function() require("ibl").setup() end
   },
 
   -- indent width auto-detection
   {
     "nmac427/guess-indent.nvim",
+    branch = "main",
     config = function() require("guess-indent").setup() end
   },
 
   -- syntax analyzer
   {
     "nvim-treesitter/nvim-treesitter",
+    branch = "main",
     config = function()
       require("nvim-treesitter").install(treesitter_servers)
 
@@ -88,6 +105,7 @@ require("lazy").setup({
   -- easily to jump
   {
     "smoka7/hop.nvim",
+    version = "*",
     config = function()
       local hop = require("hop")
       hop.setup()
@@ -99,25 +117,18 @@ require("lazy").setup({
   -- surround supports
   {
     "kylechui/nvim-surround",
+    version = "*",
     config = function() require("nvim-surround").setup() end
   },
 
-  -- comment supports
+  -- comment supports, split one-line and join multi-line
   {
-    "numToStr/Comment.nvim",
-    config = function() require("Comment").setup() end
-  },
-
-  -- auto pairs
-  {
-    "windwp/nvim-autopairs",
-    config = function() require("nvim-autopairs").setup({ check_ts = true }) end
-  },
-
-  -- split one-line or join multi-line
-  {
-    "Wansmer/treesj",
-    config = function() require("treesj").setup() end
+    "nvim-mini/mini.nvim",
+    version = "*",
+    config = function()
+      require("mini.comment").setup({})
+      require("mini.splitjoin").setup({ mappings = { toggle = "<Space>s" } })
+    end
   },
 
   -- completion register
@@ -161,6 +172,7 @@ require("lazy").setup({
   -- lsp register
   {
     "neovim/nvim-lspconfig",
+    version = "*",
     dependencies = { "saghen/blink.cmp" },
     config = function()
       -- lsp completion
@@ -168,8 +180,10 @@ require("lazy").setup({
 
       -- setup lsp
       vim.lsp.config("*", { capabilities = cap })
-      vim.lsp.config("clangd", { cmd = { "clangd", "--background-index", "--clang-tidy", "--completion-style=detailed", "--header-insertion=iwyu" } })
-      vim.lsp.enable(language_servers)
+      for name, config in pairs(language_servers) do
+        vim.lsp.config(name, config)
+        vim.lsp.enable(name)
+      end
 
       -- diagnostics column sign
       local suffix_fn = function(diagnostic)
@@ -198,6 +212,7 @@ require("lazy").setup({
   -- linter register
   {
     "mfussenegger/nvim-lint",
+    branch = "master",
     config = function()
       local lint = require("lint")
 
@@ -208,8 +223,7 @@ require("lazy").setup({
         for _, linter_server in ipairs(linter_servers_by_ft) do
           local cmd = lint.linters[linter_server].cmd
 
-          -- if cmd is function, call it
-          -- for example, biomejs, eslint, etc.
+          -- if cmd is function, call it. for example, biomejs, eslint, etc.
           if type(cmd) == "function" then
             cmd = cmd()
           end
@@ -246,19 +260,17 @@ require("lazy").setup({
   -- notify indicator
   {
     "j-hui/fidget.nvim",
+    version = "*",
     config = function() require("fidget").setup() end
   },
 
   -- fuzzy finder
   {
     "ibhagwan/fzf-lua",
+    branch = "main",
     config = function()
       local fzf_lua = require("fzf-lua")
-      fzf_lua.setup({
-        lsp = {
-          symbols = { symbol_style = 3 }
-        }
-      })
+      fzf_lua.setup({ lsp = { symbols = { symbol_style = 3 } } })
       fzf_lua.register_ui_select()
 
       -- key mapping
@@ -267,7 +279,7 @@ require("lazy").setup({
       vim.keymap.set("n", "gx", fzf_lua.lsp_declarations, { desc = "show lsp declaration" })
       vim.keymap.set("n", "gi", fzf_lua.lsp_implementations, { desc = "show lsp implementations" })
       vim.keymap.set("n", "gr", fzf_lua.lsp_references, { desc = "show lsp references" })
-      vim.keymap.set("n", "<space>a", fzf_lua.lsp_code_actions, { desc = "show lsp code actions" })
+      vim.keymap.set("n", "<Space>a", fzf_lua.lsp_code_actions, { desc = "show lsp code actions" })
       vim.keymap.set("n", "<Space>f", fzf_lua.files, { desc = "show file list" })
       vim.keymap.set("n", "<Space>F", fzf_lua.live_grep, { desc = "show live grep" })
       vim.keymap.set("n", "<Space>b", fzf_lua.buffers, { desc = "show buffer list" })
@@ -279,6 +291,7 @@ require("lazy").setup({
   -- file tree
   {
     "nvim-tree/nvim-tree.lua",
+    version = "*",
     config = function()
       require("nvim-tree").setup({
         view = { side = "right" },
@@ -305,7 +318,7 @@ require("lazy").setup({
   -- github copilot
   {
     "zbirenbaum/copilot.lua",
-    version = "v2.0.4",
+    version = "*",
     config = function()
       require("copilot").setup({
         panel = { enable = false },
@@ -317,35 +330,32 @@ require("lazy").setup({
   -- github copilot chat
   {
     "CopilotC-Nvim/CopilotChat.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
+    version = "*",
+    dependencies = { { "nvim-lua/plenary.nvim", branch = "master" } },
     config = function()
-      require("CopilotChat").setup({
-        model = "gpt-5-mini"
-      })
-      vim.keymap.set("n", "<Space>x", "<CMD>CopilotChatToggle<CR>", { desc = "toggle chat" })
+      require("CopilotChat").setup({ model = "gpt-5-mini" })
+      vim.keymap.set("n", "<Space>x", [[<CMD>CopilotChatToggle<CR>]], { desc = "toggle chat" })
     end
   },
 
   -- task runner
   {
     "stevearc/overseer.nvim",
+    version = "*",
     config = function()
-      local overseer = require("overseer")
-      overseer.setup({ templates = { "builtin", "meson-build", "meson-compile", "meson-test" } })
-      vim.keymap.set("n", "<Space>q", "<CMD>OverseerRun<CR>", { desc = "run task" })
-      vim.keymap.set("n", "<Space>Q", "<CMD>OverseerToggle<CR>", { desc = "toggle task list" })
+      require("overseer").setup({ templates = task_templates })
+      vim.keymap.set("n", "<Space>q", [[<CMD>OverseerRun<CR>]], { desc = "run task" })
+      vim.keymap.set("n", "<Space>Q", [[<CMD>OverseerToggle<CR>]], { desc = "toggle task list" })
     end
   },
 
   -- git visualization
   {
     "lewis6991/gitsigns.nvim",
+    version = "*",
     config = function()
       local gitsigns = require("gitsigns")
-      gitsigns.setup({
-        signcolumn = false,
-        numhl = true,
-      })
+      gitsigns.setup({ signcolumn = false, numhl = true })
 
       -- key mapping
       vim.keymap.set("n", "<Space>gs", gitsigns.stage_hunk, { desc = "stage/unstage hunk" })

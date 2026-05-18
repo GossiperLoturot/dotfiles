@@ -6,10 +6,19 @@ DOTFILES=$(pwd -P)
 echo "🧵create symbolic link"
 
 # zsh
+if [ -f $HOME/.zshrc ]; then
+    echo "⚠️ $HOME/.zshrc already exists."
+    exit 1
+fi
 ln -s $DOTFILES/.zshrc $HOME/.zshrc
 
 # neovim
+if [ -d $HOME/.config/nvim ]; then
+    echo "⚠️ $HOME/.config/nvim already exists."
+    exit 1
+fi
 mkdir -p $HOME/.config/nvim
-ln -s $DOTFILES/.config/nvim/init.lua $HOME/.config/nvim/init.lua
+ln -s $DOTFILES/.config/nvim $HOME/.config/
 
+# success
 echo "💡run \"source ~/.zshrc\" to apply current zsh."
