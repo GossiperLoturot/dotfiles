@@ -17,7 +17,7 @@ if [ -d $HOME/.config/nvim ]; then
     echo "⚠️ $HOME/.config/nvim already exists."
     exit 1
 fi
-mkdir -p $HOME/.config/nvim
+mkdir $HOME/.config
 ln -s $DOTFILES/.config/nvim $HOME/.config/
 
 # success

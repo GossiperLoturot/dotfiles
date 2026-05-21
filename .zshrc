@@ -86,4 +86,3 @@ if [ -r "$HOME/.cargo/env" ]; then
     export RUSTFLAGS="-C link-arg=-fuse-ld=mold"
   fi
 fi
-

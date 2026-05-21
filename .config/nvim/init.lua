@@ -69,13 +69,15 @@ require("lazy").setup({
   -- highligt f jump char
   {
     "unblevable/quick-scope",
-    version = "*"
+    version = "*",
+    event = { "BufReadPost", "BufNewFile" },
   },
 
   -- indent line
   {
     "lukas-reineke/indent-blankline.nvim",
     version = "*",
+    event = { "BufReadPost", "BufNewFile" },
     config = function() require("ibl").setup() end
   },
 
@@ -83,6 +85,7 @@ require("lazy").setup({
   {
     "nmac427/guess-indent.nvim",
     branch = "main",
+    event = "BufReadPre",
     config = function() require("guess-indent").setup() end
   },
 
@@ -90,14 +93,13 @@ require("lazy").setup({
   {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("nvim-treesitter").install(treesitter_servers)
 
       vim.api.nvim_create_autocmd("FileType", {
         pattern = treesitter_servers,
-        callback = function()
-          vim.treesitter.start()
-        end
+        callback = function() vim.treesitter.start() end
       })
     end
   },
@@ -106,6 +108,10 @@ require("lazy").setup({
   {
     "smoka7/hop.nvim",
     version = "*",
+    keys = {
+      { "gw", mode = { "n", "v", "o" }, desc = "hop words" },
+      { "gl", mode = { "n", "v", "o" }, desc = "hop lines" },
+    },
     config = function()
       local hop = require("hop")
       hop.setup()
@@ -118,6 +124,7 @@ require("lazy").setup({
   {
     "kylechui/nvim-surround",
     version = "*",
+    event = { "BufReadPost", "BufNewFile" },
     config = function() require("nvim-surround").setup() end
   },
 
@@ -125,6 +132,7 @@ require("lazy").setup({
   {
     "nvim-mini/mini.nvim",
     version = "*",
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       require("mini.comment").setup({})
       require("mini.splitjoin").setup({ mappings = { toggle = "<Space>s" } })
@@ -135,9 +143,11 @@ require("lazy").setup({
   {
     "saghen/blink.cmp",
     version = "*",
-    dependencies = { "Kaiser-Yang/blink-cmp-dictionary" },
+    event = { "InsertEnter", "CmdlineEnter" },
+    dependencies = { "Kaiser-Yang/blink-cmp-dictionary", lazy = true },
     config = function()
-      require("blink.cmp").setup({
+      local cmp = require("blink.cmp")
+      cmp.setup({
         keymap = { preset = "super-tab" },
         completion = {
           list = { selection = { auto_insert = false } },
@@ -166,6 +176,9 @@ require("lazy").setup({
           }
         }
       })
+
+      local caps = cmp.get_lsp_capabilities({})
+      vim.lsp.config("*", { capabilities = caps })
     end
   },
 
@@ -173,13 +186,11 @@ require("lazy").setup({
   {
     "neovim/nvim-lspconfig",
     version = "*",
-    dependencies = { "saghen/blink.cmp" },
+    event = { "BufReadPre", "BufNewFile" },
     config = function()
       -- lsp completion
-      local cap = require("blink.cmp").get_lsp_capabilities({})
 
       -- setup lsp
-      vim.lsp.config("*", { capabilities = cap })
       for name, config in pairs(language_servers) do
         vim.lsp.config(name, config)
         vim.lsp.enable(name)
@@ -213,6 +224,7 @@ require("lazy").setup({
   {
     "mfussenegger/nvim-lint",
     branch = "master",
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       local lint = require("lint")
 
@@ -261,6 +273,7 @@ require("lazy").setup({
   {
     "j-hui/fidget.nvim",
     version = "*",
+    event = { "LspAttach" },
     config = function() require("fidget").setup() end
   },
 
@@ -268,6 +281,7 @@ require("lazy").setup({
   {
     "ibhagwan/fzf-lua",
     branch = "main",
+    event = "VeryLazy",
     config = function()
       local fzf_lua = require("fzf-lua")
       fzf_lua.setup({ lsp = { symbols = { symbol_style = 3 } } })
@@ -292,6 +306,7 @@ require("lazy").setup({
   {
     "nvim-tree/nvim-tree.lua",
     version = "*",
+    event = "VeryLazy",
     config = function()
       require("nvim-tree").setup({
         view = { side = "right" },
@@ -319,6 +334,7 @@ require("lazy").setup({
   {
     "zbirenbaum/copilot.lua",
     version = "*",
+    event = "InsertEnter",
     config = function()
       require("copilot").setup({
         panel = { enable = false },
@@ -327,25 +343,16 @@ require("lazy").setup({
     end
   },
 
-  -- github copilot chat
-  {
-    "CopilotC-Nvim/CopilotChat.nvim",
-    version = "*",
-    dependencies = { { "nvim-lua/plenary.nvim", branch = "master" } },
-    config = function()
-      require("CopilotChat").setup({ model = "gpt-5-mini" })
-      vim.keymap.set("n", "<Space>x", [[<CMD>CopilotChatToggle<CR>]], { desc = "toggle chat" })
-    end
-  },
-
   -- task runner
   {
     "stevearc/overseer.nvim",
     version = "*",
+    event = "VeryLazy",
     config = function()
-      require("overseer").setup({ templates = task_templates })
-      vim.keymap.set("n", "<Space>q", [[<CMD>OverseerRun<CR>]], { desc = "run task" })
-      vim.keymap.set("n", "<Space>Q", [[<CMD>OverseerToggle<CR>]], { desc = "toggle task list" })
+      local overseer = require("overseer")
+      overseer.setup({ templates = task_templates })
+      vim.keymap.set("n", "<Space>q", function() overseer.run_task() end, { desc = "open task actions" })
+      vim.keymap.set("n", "<Space>Q", function() overseer.toggle({ direction = "left" }) end, { desc = "toggle task window" })
     end
   },
 
@@ -353,6 +360,7 @@ require("lazy").setup({
   {
     "lewis6991/gitsigns.nvim",
     version = "*",
+    event = { "BufReadPost", "BufNewFile" },
     config = function()
       local gitsigns = require("gitsigns")
       gitsigns.setup({ signcolumn = false, numhl = true })
